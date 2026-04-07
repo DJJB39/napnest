@@ -153,9 +153,10 @@ export const SoundMachine = () => {
     return buffer;
   }, []);
 
-  const playProgrammatic = useCallback((soundId: SoundId) => {
+  const playProgrammatic = useCallback(async (soundId: SoundId) => {
     stopAll();
     const ctx = new AudioContext();
+    await ctx.resume();
     audioCtxRef.current = ctx;
     const buffer = generateBuffer(ctx, soundId);
     const source = ctx.createBufferSource();
@@ -190,8 +191,8 @@ export const SoundMachine = () => {
     const audio = new Audio(url);
     audio.loop = true;
     audio.volume = volume;
-    audio.play().catch(() => {
-      // File might not be uploaded yet
+    audio.play().catch((err) => {
+      console.warn("Could not play sound file:", fileName, url, err);
     });
     audioElRef.current = audio;
     setIsPlaying(true);
@@ -211,7 +212,7 @@ export const SoundMachine = () => {
     playSound(soundId);
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     if (!selectedSound) return;
     if (isPlaying) {
       // Pause
@@ -220,7 +221,7 @@ export const SoundMachine = () => {
       setIsPlaying(false);
     } else {
       // Resume
-      if (audioCtxRef.current) audioCtxRef.current.resume();
+      if (audioCtxRef.current) await audioCtxRef.current.resume();
       if (audioElRef.current) audioElRef.current.play();
       setIsPlaying(true);
     }
