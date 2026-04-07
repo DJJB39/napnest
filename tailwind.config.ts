@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        heading: ["Plus Jakarta Sans", "sans-serif"],
+        heading: ["Poppins", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -60,6 +60,18 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        night: {
+          DEFAULT: "hsl(var(--night))",
+          foreground: "hsl(var(--night-foreground))",
+        },
+        nap: {
+          DEFAULT: "hsl(var(--nap))",
+          foreground: "hsl(var(--nap-foreground))",
+        },
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          foreground: "hsl(var(--coral-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -76,6 +88,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        dreamy: "0 2px 16px hsl(0 0% 0% / 0.05), 0 1px 4px hsl(0 0% 0% / 0.03)",
+        "dreamy-lg": "0 4px 24px hsl(0 0% 0% / 0.08), 0 2px 8px hsl(0 0% 0% / 0.04)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -89,16 +105,21 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.7" },
         },
-        "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 30px 8px hsl(38 92% 50% / 0.3)" },
-          "50%": { boxShadow: "0 0 50px 16px hsl(38 92% 50% / 0.5)" },
+        "float-up": {
+          "0%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(-24px)" },
+        },
+        twinkle: {
+          "0%, 100%": { opacity: "0.3" },
+          "50%": { opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "float-up": "float-up 1.5s ease-out forwards",
+        twinkle: "twinkle 3s ease-in-out infinite",
       },
     },
   },

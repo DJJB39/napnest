@@ -22,9 +22,7 @@ export const NightWakingToggle = ({ sleepEntryId }: NightWakingToggleProps) => {
 
   const fetchWakings = useCallback(async () => {
     const { data } = await supabase
-      .from("night_wakings")
-      .select("*")
-      .eq("sleep_entry_id", sleepEntryId)
+      .from("night_wakings").select("*").eq("sleep_entry_id", sleepEntryId)
       .order("wake_time", { ascending: true });
     if (data) {
       setWakings(data);
@@ -32,14 +30,11 @@ export const NightWakingToggle = ({ sleepEntryId }: NightWakingToggleProps) => {
     }
   }, [sleepEntryId]);
 
-  useEffect(() => {
-    fetchWakings();
-  }, [fetchWakings]);
+  useEffect(() => { fetchWakings(); }, [fetchWakings]);
 
   const handleWokeUp = async () => {
     const { error } = await supabase.from("night_wakings").insert({
-      sleep_entry_id: sleepEntryId,
-      wake_time: new Date().toISOString(),
+      sleep_entry_id: sleepEntryId, wake_time: new Date().toISOString(),
     });
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else fetchWakings();
@@ -47,10 +42,8 @@ export const NightWakingToggle = ({ sleepEntryId }: NightWakingToggleProps) => {
 
   const handleBackToSleep = async () => {
     if (!activeWaking) return;
-    const { error } = await supabase
-      .from("night_wakings")
-      .update({ back_to_sleep_time: new Date().toISOString() })
-      .eq("id", activeWaking.id);
+    const { error } = await supabase.from("night_wakings")
+      .update({ back_to_sleep_time: new Date().toISOString() }).eq("id", activeWaking.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else fetchWakings();
   };
@@ -63,14 +56,14 @@ export const NightWakingToggle = ({ sleepEntryId }: NightWakingToggleProps) => {
         className="w-full max-w-xs space-y-3 mt-2"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Night wakings: {wakings.length}</span>
+          <span className="text-xs text-muted-foreground font-heading">Night wakings: {wakings.length}</span>
         </div>
 
         {activeWaking ? (
           <Button
             variant="outline"
             size="sm"
-            className="w-full rounded-xl border-success/40 text-success hover:bg-success/10"
+            className="w-full rounded-2xl border-success/40 text-success hover:bg-success/10 btn-hover"
             onClick={handleBackToSleep}
           >
             <BedDouble className="w-4 h-4 mr-2" />
@@ -80,7 +73,7 @@ export const NightWakingToggle = ({ sleepEntryId }: NightWakingToggleProps) => {
           <Button
             variant="outline"
             size="sm"
-            className="w-full rounded-xl border-warning/40 text-warning hover:bg-warning/10"
+            className="w-full rounded-2xl border-warning/40 text-warning hover:bg-warning/10 btn-hover"
             onClick={handleWokeUp}
           >
             <AlertCircle className="w-4 h-4 mr-2" />

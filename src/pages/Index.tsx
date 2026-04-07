@@ -8,7 +8,7 @@ import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { useToast } from "@/hooks/use-toast";
-import { Moon } from "lucide-react";
+import { MoonStars } from "@/components/decorative/MoonStars";
 
 export interface Child {
   id: string;
@@ -35,101 +35,56 @@ const Index = () => {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-
     const { data: familyMembers } = await supabase
-      .from("family_members")
-      .select("child_id")
-      .eq("user_id", user.id)
-      .limit(1);
-
-    if (!familyMembers?.length) {
-      setLoading(false);
-      return;
-    }
+      .from("family_members").select("child_id").eq("user_id", user.id).limit(1);
+    if (!familyMembers?.length) { setLoading(false); return; }
 
     const childId = familyMembers[0].child_id;
     const { data: childData } = await supabase
-      .from("children")
-      .select("*")
-      .eq("id", childId)
-      .single();
-
+      .from("children").select("*").eq("id", childId).single();
     if (childData) setChild(childData);
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-
     const { data: entries } = await supabase
-      .from("sleep_entries")
-      .select("*")
-      .eq("child_id", childId)
-      .eq("is_deleted", false)
-      .gte("sleep_start", todayStart.toISOString())
+      .from("sleep_entries").select("*").eq("child_id", childId)
+      .eq("is_deleted", false).gte("sleep_start", todayStart.toISOString())
       .order("sleep_start", { ascending: false });
-
     if (entries) {
       setTodayEntries(entries);
-      const active = entries.find((e) => !e.sleep_end);
-      setActiveSleep(active || null);
+      setActiveSleep(entries.find((e) => !e.sleep_end) || null);
     }
-
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Realtime subscription
   useEffect(() => {
     if (!child) return;
     const channel = supabase
       .channel("sleep-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "sleep_entries", filter: `child_id=eq.${child.id}` },
-        () => fetchData()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "sleep_entries", filter: `child_id=eq.${child.id}` }, () => fetchData())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [child, fetchData]);
 
   const autoClassifySleepType = () => {
     const hour = new Date().getHours();
-    // TODO: use configurable night start from settings
     return hour >= 18 || hour < 6 ? "night" : "nap";
   };
 
   const handleToggleSleep = async () => {
     if (!child) return;
-
     if (activeSleep) {
-      const { error } = await supabase
-        .from("sleep_entries")
-        .update({ sleep_end: new Date().toISOString() })
-        .eq("id", activeSleep.id);
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-      } else {
-        setActiveSleep(null);
-        fetchData();
-      }
+      const { error } = await supabase.from("sleep_entries").update({ sleep_end: new Date().toISOString() }).eq("id", activeSleep.id);
+      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      else { setActiveSleep(null); fetchData(); }
     } else {
-      const { data, error } = await supabase
-        .from("sleep_entries")
-        .insert({
-          child_id: child.id,
-          sleep_start: new Date().toISOString(),
-          sleep_type: autoClassifySleepType(),
-        })
-        .select()
-        .single();
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-      } else if (data) {
-        setActiveSleep(data);
-        fetchData();
-      }
+      const { data, error } = await supabase.from("sleep_entries")
+        .insert({ child_id: child.id, sleep_start: new Date().toISOString(), sleep_type: autoClassifySleepType() })
+        .select().single();
+      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      else if (data) { setActiveSleep(data); fetchData(); }
     }
   };
 
@@ -144,7 +99,7 @@ const Index = () => {
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80dvh] p-6 text-center">
-        <Moon className="w-16 h-16 text-muted-foreground mb-4" />
+        <MoonStars className="w-24 h-24 mb-4 opacity-50" />
         <h2 className="text-lg font-heading font-semibold mb-2">No child profile yet</h2>
         <p className="text-muted-foreground text-sm">Please complete onboarding to get started.</p>
       </div>
@@ -155,37 +110,34 @@ const Index = () => {
   const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
 
   return (
-    <div className="flex flex-col items-center px-4 pt-8">
+    <div className="flex flex-col items-center px-4 pt-8 relative">
+      {/* Decorative */}
+      <MoonStars className="absolute top-2 right-2 w-16 h-16 opacity-20" />
+
       {/* Header */}
       <div className="text-center mb-6">
         <p className="text-muted-foreground text-sm">Tracking</p>
-        <h1 className="text-xl font-heading font-bold">{child.name}</h1>
+        <h1 className="text-xl font-heading font-bold">{child.name} 🌙</h1>
       </div>
 
-      {/* Wake Window Timer */}
       {!activeSleep && lastWakeTime && (
         <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
       )}
 
-      {/* Hero Sleep Button */}
       <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
 
-      {/* Night Waking Toggle - shown during active night sleep */}
       {activeSleep && activeSleep.sleep_type === "night" && (
         <NightWakingToggle sleepEntryId={activeSleep.id} />
       )}
 
-      {/* Sleep Timer */}
       <div className="mt-6">
         <SleepTimer />
       </div>
 
-      {/* Sound Machine */}
       <div className="mt-4">
         <SoundMachine />
       </div>
 
-      {/* Today Summary */}
       <TodaySummary entries={todayEntries} />
     </div>
   );
