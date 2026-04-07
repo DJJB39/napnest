@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Home, Clock, BarChart3, MessageCircle, Settings } from "lucide-react";
+import { Home, Clock, BarChart3, CalendarHeart, BookOpen, MessageCircle, Settings } from "lucide-react";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/history", icon: Clock, label: "History" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
+  { to: "/expect", icon: CalendarHeart, label: "Expect" },
+  { to: "/stories", icon: BookOpen, label: "Stories" },
   { to: "/ask-ai", icon: MessageCircle, label: "Ask AI" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
@@ -28,10 +30,10 @@ export const BottomNav = () => {
           >
             {({ isActive }) => (
               <>
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{label}</span>
+                <Icon className="w-4 h-4" />
+                <span className="text-[9px] font-medium">{label}</span>
                 {isActive && (
-                  <div className="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                  <div className="absolute bottom-1 w-1 h-1 rounded-full bg-primary" />
                 )}
               </>
             )}
