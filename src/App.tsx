@@ -70,6 +70,8 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/expect" element={<WhatToExpect />} />
+                <Route path="/stories" element={<BedtimeBook />} />
                 <Route path="/ask-ai" element={<AskAI />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
