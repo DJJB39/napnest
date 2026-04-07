@@ -1,47 +1,44 @@
 
 
-## Fix: RLS Policy Bug + Auth Redirect + End-to-End Audit
+## Demo Landing Page — Using Real App Components with Mock Data
 
-### Root Cause of the Error
+### Approach
+Create a `LandingPage` component at `/auth` that wraps the **actual existing components** (SleepButton, WakeWindowTimer, TodaySummary, WeeklySummary, SleepTimeline, BottomNav, History cards, Reports charts) with 30 days of generated mock data. No new views — just the real UI rendered in a non-interactive demo mode with a "Sign Up" CTA overlay.
 
-The onboarding flow does this:
-1. INSERT into `children` (with `.select().single()` to get the new row back)
-2. INSERT into `family_members` (linking user to child)
-3. UPDATE `profiles`
+### Structure
 
-Step 1 fails because `.select().single()` triggers the **SELECT** RLS policy on `children`, which requires `is_family_member(auth.uid(), id)`. But the `family_members` row hasn't been created yet (that's step 2). So Supabase blocks the SELECT after the INSERT.
+**1. Mock data generator** (`src/lib/demoData.ts`)
+- Generate 30 days of realistic sleep entries for a 4-month-old baby ("Lily"):
+  - 1 night sleep per day (7pm–6am with slight variation)
+  - 2–3 naps per day (varying 30–90 min durations)
+  - Occasional night wakings (0–2 per night)
+- Export typed arrays matching `SleepEntry[]` and `DayData[]` interfaces
+- Pre-compute today's entries, weekly summaries, and chart data
 
-### Fixes
+**2. Landing page layout** (`src/pages/Auth.tsx` — rewrite)
+- Top: DreamLog branding + tagline
+- Scrollable demo section showing real components in sequence:
+  - **Dashboard preview**: `WakeWindowTimer` (with mock lastWakeTime 45 min ago) + `SleepButton` (awake state, non-interactive) + `TodaySummary` (with today's mock entries)
+  - **Reports preview**: `WeeklySummary` (with mock this/last week data) + the Recharts `BarChart` and `AreaChart` (same JSX from Reports.tsx, fed mock data) + `SleepTimeline` (with mock entries)
+  - **History preview**: A few History-style cards (same card markup from History.tsx)
+- Each section labeled with a subtle heading ("Dashboard", "Reports", "History")
+- `BottomNav` shown at bottom (non-functional, visual only)
+- Floating CTA at bottom: "Start Tracking — It's Free" button → scrolls up to reveal auth form
+- Auth form (existing login/signup) shown in a collapsible section at top or via modal
 
-**1. Database migration -- Add a SELECT policy for child creators**
-
-Add a new RLS policy on `children` so the person who created the child can also SELECT it (not just family members):
-
-```sql
-CREATE POLICY "Creators can view own children"
-  ON public.children FOR SELECT
-  USING (auth.uid() = created_by);
-```
-
-This lets the `.select().single()` succeed immediately after INSERT, before the `family_members` row exists.
-
-**2. Auth page -- redirect after login**
-
-`Auth.tsx` currently does nothing after a successful `signInWithPassword`. Add a `useEffect` that watches `user` from `useAuth()` and navigates to `"/"` when authenticated. The `OnboardingGate` wrapper on `"/"` will then redirect to `/onboarding` if needed.
-
-**3. Sign out redirect**
-
-After sign out in `AuthContext.tsx`, the user should be redirected to `/auth`. Currently `signOut` just calls `supabase.auth.signOut()` with no navigation.
+**3. Route changes** (`src/App.tsx`)
+- `/auth` renders the new landing page (already does)
+- Authenticated users still redirect to `/`
 
 ### Files Changed
 
 | File | Change |
 |------|--------|
-| New migration SQL | Add `Creators can view own children` SELECT policy |
-| `src/pages/Auth.tsx` | Add redirect to `/` when user is authenticated |
+| `src/lib/demoData.ts` | New — generates 30-day mock data |
+| `src/pages/Auth.tsx` | Rewrite — landing page with demo + auth form |
 
-### What This Fixes
-- Onboarding "Let's go!" no longer throws RLS error
-- Login redirects to dashboard (or onboarding if incomplete)
-- The full signup → confirm → login → onboard → track flow works end-to-end
+### What stays the same
+- All existing components are imported and used as-is (SleepButton, WakeWindowTimer, TodaySummary, WeeklySummary, SleepTimeline, BottomNav)
+- No new "demo-only" UI components created
+- The real charts from Reports.tsx (BarChart, AreaChart) are rendered inline with mock data using the same Recharts JSX
 
