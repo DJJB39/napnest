@@ -209,7 +209,7 @@ const Index = () => {
           transition={{ delay: 0.3 }}
           className="mt-6 w-full flex flex-col items-center"
         >
-          <h2 className="text-lg font-display font-bold text-center mb-3 text-foreground">🎵 Sound Machine</h2>
+          <h2 className="text-lg font-display font-bold text-center mb-3 text-foreground">💤 Sound Machine</h2>
           <SoundMachine />
         </motion.div>
 
