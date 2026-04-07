@@ -1,42 +1,38 @@
 
 
-# Add "Night Glow" Red Tint Mode
+# Upload Rain & Ocean MP3s to Storage Bucket
 
-## What It Does
-A button placed directly below the SleepButton that activates a full-screen red tint overlay — simulating a "night light" mode to protect baby's (and parent's) eyes during nighttime feeds/checks. Auto-off after 30 minutes, toggle off on second tap.
+## Problem
+The `sound_files` bucket exists but has an RLS policy requiring `authenticated` role for INSERT. We don't have the service role key in the environment, so we can't upload directly via the Storage API from the sandbox.
 
-## Implementation
+## Solution
 
-### 1. New Component: `src/components/sleep/NightGlow.tsx`
+### Step 1: Create a temporary edge function for uploading
+Create `supabase/functions/upload-sound/index.ts` — a simple function that uses the `SUPABASE_SERVICE_ROLE_KEY` (available inside edge functions) to upload files to the `sound_files` bucket.
 
-**State**: `active` boolean, `timerRef` for 30-min auto-off.
+### Step 2: Generate audio files
+Use Python (numpy + scipy) to generate:
+- **rain.mp3** — filtered white noise with random raindrop bursts, 30-second loop
+- **ocean.mp3** — low-pass filtered noise with slow amplitude modulation simulating wave surges, 30-second loop
 
-**Button UI**:
-- Warm lantern-style button: rounded pill with soft red/coral background (`bg-coral/15`), red icon (Lucide `Flame` or custom lantern SVG), label "Night Glow"
-- Subtle glow shadow when active (`glow-coral`)
-- Positioned inline (not floating), placed right after SleepButton in the layout
+### Step 3: Deploy edge function and upload
+1. Deploy the `upload-sound` edge function
+2. Use `curl` to POST each MP3 file to the edge function
+3. Verify files are accessible at the public URLs
 
-**When active — renders a portal/fixed overlay**:
-- `position: fixed; inset: 0; z-index: 999; pointer-events: none`
-- `background: #ff0000; opacity: 0.3`
-- Applies `filter: brightness(0.4) saturate(0.2)` to the `#root` element via `document.getElementById('root').style.filter`
-- Fade-in/out via CSS transition (`transition: opacity 2s ease`)
-- Corner Zzz animation: small floating "Zzz" text in bottom-right, animated with CSS keyframes (float up and fade)
+### Step 4: Cleanup
+Delete the `upload-sound` edge function (it was only needed for the upload).
 
-**iOS popup**: On first activation, check `navigator.userAgent` for iPhone/iPad. If iOS, show a one-time toast/dialog: "For an even gentler glow, go to Settings > Accessibility > Display > Color Filters > Color Tint > Red." Store dismissal in `localStorage`.
-
-**30-min auto-off**: `setTimeout` of 30 minutes clears the overlay and resets filter. Cleanup on unmount.
-
-**No battery concerns**: Pure CSS overlay + filter, no canvas/WebGL.
-
-### 2. Update `src/pages/Index.tsx`
-
-Insert `<NightGlow />` directly after the `<SleepButton />` line (line 189), wrapped in a motion.div with fade-in animation, before the NightWakingToggle section.
+### Step 5: Verify
+Confirm both files play correctly by checking the public Storage URLs match what `SoundMachine.tsx` expects: `${SUPABASE_URL}/storage/v1/object/public/sound_files/rain.mp3`
 
 ## Files
 
 | File | Action |
 |------|--------|
-| `src/components/sleep/NightGlow.tsx` | Create — button + overlay + iOS popup + Zzz animation |
-| `src/pages/Index.tsx` | Edit — import and place NightGlow below SleepButton |
+| `supabase/functions/upload-sound/index.ts` | Create (temporary upload helper) |
+| No app code changes needed | — |
+
+## Post-upload
+The Sound Machine dropdown options for Rain and Ocean will immediately start working since the component already references the correct bucket paths.
 
