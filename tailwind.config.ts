@@ -73,6 +73,14 @@ export default {
           DEFAULT: "hsl(var(--coral))",
           foreground: "hsl(var(--coral-foreground))",
         },
+        "orange-warm": {
+          DEFAULT: "hsl(var(--orange-warm))",
+          foreground: "hsl(var(--orange-warm-foreground))",
+        },
+        "green-glow": {
+          DEFAULT: "hsl(var(--green-glow))",
+          foreground: "hsl(var(--green-glow-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
