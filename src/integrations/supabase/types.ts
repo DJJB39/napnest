@@ -14,13 +14,268 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_reviews: {
+        Row: {
+          child_id: string
+          created_at: string
+          data_range: string | null
+          id: string
+          model_used: string | null
+          review_text: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          data_range?: string | null
+          id?: string
+          model_used?: string | null
+          review_text: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          data_range?: string | null
+          id?: string
+          model_used?: string | null
+          review_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_reviews_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_of_birth: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_of_birth: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invites: {
+        Row: {
+          child_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          status: string
+          token: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          status?: string
+          token: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      night_wakings: {
+        Row: {
+          back_to_sleep_time: string | null
+          created_at: string
+          id: string
+          sleep_entry_id: string
+          wake_time: string
+        }
+        Insert: {
+          back_to_sleep_time?: string | null
+          created_at?: string
+          id?: string
+          sleep_entry_id: string
+          wake_time: string
+        }
+        Update: {
+          back_to_sleep_time?: string | null
+          created_at?: string
+          id?: string
+          sleep_entry_id?: string
+          wake_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "night_wakings_sleep_entry_id_fkey"
+            columns: ["sleep_entry_id"]
+            isOneToOne: false
+            referencedRelation: "sleep_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          onboarding_complete: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          onboarding_complete?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          onboarding_complete?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sleep_entries: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          is_deleted: boolean
+          sleep_end: string | null
+          sleep_start: string
+          sleep_type: string
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          sleep_end?: string | null
+          sleep_start: string
+          sleep_type?: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          sleep_end?: string | null
+          sleep_start?: string
+          sleep_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sleep_entries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wake_window_config: {
+        Row: {
+          id: string
+          max_age_weeks: number
+          max_wake_minutes: number
+          min_age_weeks: number
+          min_wake_minutes: number
+        }
+        Insert: {
+          id?: string
+          max_age_weeks: number
+          max_wake_minutes: number
+          min_age_weeks: number
+          min_wake_minutes: number
+        }
+        Update: {
+          id?: string
+          max_age_weeks?: number
+          max_wake_minutes?: number
+          min_age_weeks?: number
+          min_wake_minutes?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_family_member: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
