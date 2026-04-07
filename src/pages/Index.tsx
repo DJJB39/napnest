@@ -190,6 +190,14 @@ const Index = () => {
 
         <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
 
+        {activeSleep && (
+          <EditStartTime
+            sleepEntryId={activeSleep.id}
+            currentStart={activeSleep.sleep_start}
+            onUpdated={fetchData}
+          />
+        )}
+
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
