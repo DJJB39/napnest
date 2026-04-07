@@ -212,7 +212,7 @@ export const SoundMachine = () => {
     playSound(soundId);
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     if (!selectedSound) return;
     if (isPlaying) {
       // Pause
