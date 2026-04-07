@@ -1,78 +1,89 @@
 
 
-# Premium Visual Redesign — NapNest "Dreamy Pastel" Theme
+# NapNest UX Overhaul — Precise Instruction-by-Instruction Implementation
 
-## What Changes
+## Issues with Current State (Why It Feels Off)
 
-A complete visual overhaul of every page and component, inspired by the reference images: soft pastel gradients, warm rounded cards with gentle shadows, decorative SVG illustrations (sleeping baby, moon, stars, Zzz clouds), playful typography, and micro-animations. No structural/feature changes — same components, same data flow, just a premium skin.
+1. **Title font**: Using Poppins (clean sans-serif) — user wants a **playful handwritten font** for titles
+2. **Illustrations**: The `SleepingBabyNest` SVG is a tiny, crude 160x120 illustration — user wants a **big, prominent illustrated sleeping baby curled in fluffy nest under moon/stars**
+3. **Auth form placement**: Sign Up/Log In buttons open a form **below the feature cards** — user says **"no auth form under features"**
+4. **"Try Demo" styling**: Currently coral ghost text — user wants it as a **warm orange button**
+5. **Background**: Generic light gradient — user wants **pastel blue-pink gradient with subtle moon/star patterns**
+6. **No warm textures**: No grain, no depth — user wants **light grain texture**
+7. **No floating illustrations** on dashboard
+8. **Dashboard timer**: No prominent "Start Sleep Timer" call-to-action button
+9. **Sound Machine section**: No sound wave icons, no section header prominence
+10. **Reports**: No progress rings, no NHS green band visual treatment
 
-## Design System Overhaul
+## Exact Plan (Following User Instructions Line by Line)
 
-### Color Palette (CSS variables in `src/index.css`)
-- **Background**: Light mode default — soft gradient from `#EBF4FF` (pale blue) to `#FFF0F5` (pale pink)
-- **Cards**: White with subtle pink/blue tint, soft `box-shadow: 0 2px 16px rgba(0,0,0,0.06)`
-- **Primary**: Teal `#5BB5A2` (sleep button, charts, progress)
-- **Accent/CTA**: Warm coral `#F97068` for actions, warm orange `#F59E0B` for "Try Demo"
-- **Night**: Deep indigo `#6366F1`
-- **Nap**: Soft lavender `#A78BFA`
-- **Text**: Dark slate `#1E293B` headings, `#64748B` body/muted
-- **Dark mode preserved** — dark navy variant of same palette
+### 1. Add Handwritten Font for Titles
+- Import **Caveat** (Google Font, playful handwritten style) in `src/index.css`
+- Add `font-display` family to `tailwind.config.ts`
+- Use Caveat for hero title and section headings, keep Poppins for card titles/labels
 
-### Typography
-- Import **Poppins** (700 for headings — playful, rounded) alongside existing Inter
-- Titles use Poppins Bold, body stays Inter
-- Larger heading sizes, more breathing room
+### 2. Replace Illustrations with Rich SVGs (`src/components/decorative/MoonStars.tsx`)
+- **New hero illustration**: Large (280x240) sleeping baby curled up in a fluffy cloud nest under a crescent moon with scattered stars and floating Zzz clouds — inspired by the uploaded reference images (baby on moon, sheep on cloud, star-pajama baby)
+- Keep existing `MoonStars` and `FloatingZzz` but enhance
+- Add `SleepingCloud` — fluffy cloud with Zzz drifting up (ref: sheep image)
+- All inline SVG, no external files
 
-### Global Styles
-- `border-radius: 1.25rem` (20px) on all cards, buttons, inputs
-- Subtle gradient backgrounds on page wrappers
-- Soft drop shadows everywhere (no hard borders)
-- Transition on all interactive elements: `transition-all duration-200`
+### 3. Rewrite Landing Page (`src/pages/Auth.tsx`)
+Per user instructions:
+- **Hero**: Big illustrated baby in nest under moon/stars, pastel blue-pink gradient bg, soft shadows, twinkly Zzz clouds
+- **Title**: In Caveat handwritten font — "NapNest: Track Your Baby's Sleep Like Magic"
+- **Subtitle**: Clean Inter sans-serif — "Log naps, get AI tips, soothe with noise — free & simple"
+- **Buttons centered**: "Sign Up Free" (green glow), "Log In" (outline), "Try Demo" below in **warm orange** — these are the only CTAs in the hero
+- **Auth form**: Opens as a **modal/overlay**, NOT inline under features
+- **Feature cards below**: Sleep Tracking (clock icon), AI (star icon), Sound (wave icon) — rounded pastel cards with tiny icons, subtle hover lift
+- **No auth form below features**
 
-## Files Changed
+### 4. Dashboard Overhaul (`src/pages/Index.tsx`)
+- Baby name "Luna" with cute moon emoji (already exists, keep)
+- **Floating baby illustration** in corner (SleepingBabyNest SVG, positioned absolute top-right, larger, semi-transparent)
+- **SleepButton**: Keep existing circular button with Zzz animation
+- **"Start Sleep Timer" button**: Prominent CTA-style button
+- **Sound Machine section**: Clear section header, White/Brown buttons with sound wave icons and play glow
+
+### 5. Add Warm Textures & Depth (`src/index.css`)
+- CSS `background-image` with subtle grain overlay (SVG noise pattern, 3% opacity)
+- Warmer gradient: more pink warmth blended in
+- Soft shadows on everything (already partially done, enhance)
+
+### 6. Reports Progress Rings (`src/components/reports/WeeklySummary.tsx`)
+- Replace flat stat cards with **circular progress ring SVGs** for daily average and totals
+- NHS green band reference kept in area chart
+
+### 7. Micro-animations Enhancement
+- Fade-in on all page sections (staggered)
+- Pulse on timer digits when running
+- Twinkle on decorative stars (already exists)
+- Hover lift on all cards (already exists, keep)
+
+### Files Changed
 
 | File | Change |
 |------|--------|
-| `src/index.css` | New pastel light-mode-default palette, gradient body bg, Poppins import, glow utilities, decorative SVG patterns as CSS backgrounds |
-| `tailwind.config.ts` | Add Poppins to `fontFamily.heading`, add pastel color tokens, add new shadow utilities |
-| `src/pages/Auth.tsx` | Gradient hero bg, decorative moon/stars/cloud SVGs (inline JSX), glow effect on Sign Up button, warm orange "Try Demo" button, feature cards with pastel icon backgrounds |
-| `src/pages/Demo.tsx` | Same gradient wrapper, softer card styling, teal chart colors, decorative elements |
-| `src/pages/Index.tsx` | Gradient page bg, greeting with baby name + emoji, cards with soft shadows, decorative sleeping-baby SVG illustration in header area |
-| `src/components/sleep/SleepButton.tsx` | Larger button (40x40), pastel gradient fill (teal awake, indigo sleeping), floating Zzz animation when sleeping, softer glow rings |
-| `src/components/sleep/WakeWindowTimer.tsx` | Progress bar with rounded pill shape, gradient fill (green→amber→coral), softer labels |
-| `src/components/sleep/TodaySummary.tsx` | Cards with white bg + pastel icon circles, gentle shadows |
-| `src/components/sleep/SleepTimer.tsx` | Circular progress ring with gradient stroke, large rounded card wrapper |
-| `src/components/sleep/SoundMachine.tsx` | Rounded card with pastel toggle pills, volume slider with teal track |
-| `src/components/layout/BottomNav.tsx` | Frosted glass white bg, rounded-top-2xl, active indicator dot, pastel active color |
-| `src/components/layout/AppLayout.tsx` | Gradient background wrapper |
-| `src/pages/Reports.tsx` | Teal/lavender chart colors, white cards with shadows, softer tooltips |
-| `src/pages/History.tsx` | Pastel entry cards with left accent border (indigo for night, lavender for nap) |
-| `src/pages/Settings.tsx` | Consistent pastel card styling |
-| `src/pages/Onboarding.tsx` | Full-screen gradient, larger illustrations, playful step indicators |
-| `src/components/reports/WeeklySummary.tsx` | Pastel card backgrounds, trend icons in colored circles |
-| `src/components/reports/SleepTimeline.tsx` | Teal/lavender bar colors on white bg |
-| `src/components/sleep/NightWakingToggle.tsx` | Soft card styling |
+| `src/index.css` | Add Caveat font import, grain texture overlay, warmer gradients |
+| `tailwind.config.ts` | Add `font-display: ['Caveat']` family |
+| `src/components/decorative/MoonStars.tsx` | New large hero illustration (baby in cloud nest under moon), enhanced floating Zzz |
+| `src/pages/Auth.tsx` | Full rewrite: handwritten title, big illustration, green glow Sign Up, orange Try Demo, auth as modal overlay, feature cards below with hover lift |
+| `src/pages/Index.tsx` | Floating corner illustration, prominent timer CTA, sound machine section styling |
+| `src/pages/Demo.tsx` | Match Auth.tsx styling updates, same gradient/illustration treatment |
+| `src/components/sleep/SleepButton.tsx` | Minor: warmer glow colors |
+| `src/components/sleep/SleepTimer.tsx` | Pulse animation on digits |
+| `src/components/sleep/SoundMachine.tsx` | Sound wave icons on buttons, section header |
+| `src/components/reports/WeeklySummary.tsx` | Progress ring SVGs for averages |
+| `src/components/layout/AppLayout.tsx` | Grain texture overlay |
 
-## Decorative SVG Illustrations (inline JSX, no external files)
+### What Stays the Same
+- All data fetching, Supabase integration, auth logic
+- Component interfaces/props
+- Routing, RLS policies
+- History, Settings pages (minor shadow/border consistency only)
 
-1. **Moon & Stars** — crescent moon with 3-5 small stars, used on Auth hero and empty states
-2. **Sleeping Cloud / Zzz** — soft cloud with floating Z letters, animated on SleepButton when sleeping
-3. **Baby in Nest** — simple stylized nest silhouette with a sleeping baby shape, used on landing hero
-4. **Star scatter** — tiny stars as decorative background pattern on page headers
-
-All rendered as inline `<svg>` elements in components — no image files needed.
-
-## Micro-animations
-
-- Buttons: `hover:scale-105 active:scale-95` with spring transition
-- Cards: subtle `hover:shadow-lg hover:-translate-y-0.5` lift effect
-- Sleep button Zzz: floating upward animation using framer-motion
-- Page entries: staggered fade-in (already exists, keep)
-- Stars on landing: gentle twinkle (opacity pulse)
-
-## What Stays the Same
-- All data fetching, auth, Supabase integration, routing — untouched
-- Component props/interfaces — unchanged
-- Demo data generation — unchanged
-- Feature set — identical
+### Known Constraints / Callouts
+- **Handwritten font**: Using Google Fonts Caveat (free, well-supported). If user prefers a different handwritten font, can swap easily.
+- **Grain texture**: Done via CSS SVG data URI — no external files, works everywhere, ~3% opacity for subtlety.
+- **Hero illustration**: Will be a detailed inline SVG (~50-80 lines) — baby curled on a fluffy cloud with moon overhead and stars. Styled to match the uploaded references (soft pastel colors, rounded shapes, rosy cheeks).
 
