@@ -49,6 +49,50 @@ export type Database = {
           },
         ]
       }
+      bedtime_chapters: {
+        Row: {
+          chapter_number: number
+          child_id: string
+          created_at: string
+          id: string
+          illustration_url: string | null
+          materia_color: string | null
+          materia_name: string | null
+          story_text: string
+          title: string
+        }
+        Insert: {
+          chapter_number: number
+          child_id: string
+          created_at?: string
+          id?: string
+          illustration_url?: string | null
+          materia_color?: string | null
+          materia_name?: string | null
+          story_text: string
+          title: string
+        }
+        Update: {
+          chapter_number?: number
+          child_id?: string
+          created_at?: string
+          id?: string
+          illustration_url?: string | null
+          materia_color?: string | null
+          materia_name?: string | null
+          story_text?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bedtime_chapters_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           created_at: string
@@ -142,6 +186,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "invites_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          achieved_at: string
+          child_id: string
+          created_at: string
+          id: string
+          milestone_key: string
+        }
+        Insert: {
+          achieved_at?: string
+          child_id: string
+          created_at?: string
+          id?: string
+          milestone_key: string
+        }
+        Update: {
+          achieved_at?: string
+          child_id?: string
+          created_at?: string
+          id?: string
+          milestone_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_child_id_fkey"
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
