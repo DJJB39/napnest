@@ -1,44 +1,55 @@
 
 
-## Demo Landing Page — Using Real App Components with Mock Data
+## Fix Build Errors + Implement NapNest Revamp
 
-### Approach
-Create a `LandingPage` component at `/auth` that wraps the **actual existing components** (SleepButton, WakeWindowTimer, TodaySummary, WeeklySummary, SleepTimeline, BottomNav, History cards, Reports charts) with 30 days of generated mock data. No new views — just the real UI rendered in a non-interactive demo mode with a "Sign Up" CTA overlay.
+### 1. Fix `chart.tsx` type errors
 
-### Structure
+The `recharts` package was likely updated, breaking type inference on `ChartTooltipContent` and `ChartLegendContent`. Fix by adding explicit type annotations for `payload`, `label`, and `active` props using `any` casts on the destructured props, matching the shadcn/ui pattern for recharts v2.14+.
 
-**1. Mock data generator** (`src/lib/demoData.ts`)
-- Generate 30 days of realistic sleep entries for a 4-month-old baby ("Lily"):
-  - 1 night sleep per day (7pm–6am with slight variation)
-  - 2–3 naps per day (varying 30–90 min durations)
-  - Occasional night wakings (0–2 per night)
-- Export typed arrays matching `SleepEntry[]` and `DayData[]` interfaces
-- Pre-compute today's entries, weekly summaries, and chart data
+### 2. Rename DreamLog → NapNest
 
-**2. Landing page layout** (`src/pages/Auth.tsx` — rewrite)
-- Top: DreamLog branding + tagline
-- Scrollable demo section showing real components in sequence:
-  - **Dashboard preview**: `WakeWindowTimer` (with mock lastWakeTime 45 min ago) + `SleepButton` (awake state, non-interactive) + `TodaySummary` (with today's mock entries)
-  - **Reports preview**: `WeeklySummary` (with mock this/last week data) + the Recharts `BarChart` and `AreaChart` (same JSX from Reports.tsx, fed mock data) + `SleepTimeline` (with mock entries)
-  - **History preview**: A few History-style cards (same card markup from History.tsx)
-- Each section labeled with a subtle heading ("Dashboard", "Reports", "History")
-- `BottomNav` shown at bottom (non-functional, visual only)
-- Floating CTA at bottom: "Start Tracking — It's Free" button → scrolls up to reveal auth form
-- Auth form (existing login/signup) shown in a collapsible section at top or via modal
+Update `index.html` title/meta, `manifest.json` name, and any string references in `Settings.tsx` or other components.
 
-**3. Route changes** (`src/App.tsx`)
-- `/auth` renders the new landing page (already does)
-- Authenticated users still redirect to `/`
+### 3. Rewrite Landing Page (`src/pages/Auth.tsx`)
 
-### Files Changed
+Clean hero section:
+- Title: "NapNest: Track Your Baby's Sleep Like Magic"
+- Subtitle: "Log naps, get AI tips, soothe with noise — free & simple"
+- **Sign Up Free** + **Log In** buttons → toggle inline auth forms
+- **Try Demo (No Account)** secondary button → navigates to `/demo`
+- Below hero: 3 feature highlight cards (tracking, AI, sound machine)
 
-| File | Change |
+### 4. New Demo Page (`src/pages/Demo.tsx`)
+
+Public `/demo` route using existing `demoData.ts` + real components (`TodaySummary`, `WeeklySummary`, `SleepTimeline`, charts). Fixed "Ask AI" button shows static advice message. Banner with "Sign up free" CTA.
+
+### 5. Sleep Timer (`src/components/sleep/SleepTimer.tsx`)
+
+3-hour countdown with pause/resume/cancel. Large monospace digits. Rendered on authenticated dashboard.
+
+### 6. Sound Machine (`src/components/sleep/SoundMachine.tsx`)
+
+Web Audio API generates white/brown noise programmatically. Two toggle buttons, volume slider, play/pause. No external files needed.
+
+### 7. Update Dashboard (`src/pages/Index.tsx`)
+
+Add `SleepTimer` and `SoundMachine` below existing sleep button.
+
+### 8. Route Update (`src/App.tsx`)
+
+Add public `/demo` route.
+
+### Files
+
+| File | Action |
 |------|--------|
-| `src/lib/demoData.ts` | New — generates 30-day mock data |
-| `src/pages/Auth.tsx` | Rewrite — landing page with demo + auth form |
-
-### What stays the same
-- All existing components are imported and used as-is (SleepButton, WakeWindowTimer, TodaySummary, WeeklySummary, SleepTimeline, BottomNav)
-- No new "demo-only" UI components created
-- The real charts from Reports.tsx (BarChart, AreaChart) are rendered inline with mock data using the same Recharts JSX
+| `src/components/ui/chart.tsx` | Fix type errors |
+| `index.html` | Rename to NapNest |
+| `public/manifest.json` | Rename to NapNest |
+| `src/pages/Auth.tsx` | Rewrite — hero + auth |
+| `src/pages/Demo.tsx` | **New** — demo dashboard |
+| `src/components/sleep/SleepTimer.tsx` | **New** — countdown |
+| `src/components/sleep/SoundMachine.tsx` | **New** — noise player |
+| `src/pages/Index.tsx` | Add timer + sound |
+| `src/App.tsx` | Add `/demo` route |
 
