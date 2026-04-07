@@ -1,70 +1,41 @@
 
 
-# Add "Ask AI" Chat Tab — NHS-Guided Baby Q&A
+# Upgrade Sound Machine — Dropdown Selector + Audio Files
 
-## Overview
-Add a 5th bottom nav tab "Ask AI" that opens a chat interface where parents can ask baby health/sleep/development questions. Answers are grounded in NHS UK guidance via a system prompt with embedded NHS content (no RAG/vector DB needed — the NHS content fits within the system prompt context window). Responses are short, reassuring, and cite NHS.uk.
+## Constraint Callout
+**Rain/Ocean MP3s**: I cannot download files from Pixabay automatically. I will create a Supabase storage bucket for sound files and provide the UI that plays from it. **You will need to upload the MP3 files** (rain loop, ocean loop) to the bucket after implementation. Plain white/brown noise and Deep Rumble will remain programmatic (Web Audio API).
 
-## Architecture
+## What Changes
 
-```text
-User → Chat UI (/ask-ai) → Edge Function (nhs-chat) → Lovable AI Gateway
-                                                         ↑
-                                              System prompt with
-                                              embedded NHS guidance
-```
+### 1. Storage Bucket (SQL migration)
+- Create `sound_files` public bucket for MP3 uploads
+- RLS: public read access (anyone can stream), authenticated insert for admin uploads
 
-**Why embedded NHS content instead of RAG**: The relevant NHS baby guidance (sleep, teething, development, feeding) is ~10-15KB of text — well within model context limits. This avoids the complexity of vector embeddings, storage buckets, and retrieval pipelines while ensuring accuracy.
+### 2. `SoundMachine.tsx` — Full Rewrite
+**UI overhaul:**
+- Replace two toggle buttons with a `Select` dropdown
+- Categories: "White Noise" group (Plain, Rain, Ocean) and "Brown Noise" group (Plain, Deep Rumble)
+- Cozy raindrop+Zzz icon in header (inline SVG)
+- Play/Pause button, volume slider (keep existing)
+- Active sound name displayed with animated equalizer bars
 
-## Files to Create/Edit
+**Audio logic:**
+- **Programmatic sounds** (Plain White, Plain Brown, Deep Rumble): Web Audio API buffer generation, same as current but Deep Rumble uses lower frequency filter
+- **File-based sounds** (Rain, Ocean): Fetch MP3 from Supabase storage bucket URL, play via `HTMLAudioElement` with loop
+- 3-hour auto-stop timer with 30-second fade-out (gain ramp to 0)
+- Volume slider controls both programmatic gain node and HTML audio element volume
+
+### 3. `Index.tsx` — Minor
+- Update section header emoji/text to match new design
+
+## Files
 
 | File | Action |
 |------|--------|
-| `supabase/functions/nhs-chat/index.ts` | **New** — Edge function with NHS guidance system prompt |
-| `src/pages/AskAI.tsx` | **New** — Chat page with warm UI |
-| `src/components/layout/BottomNav.tsx` | Add 5th nav item |
-| `src/App.tsx` | Add `/ask-ai` route |
+| Migration SQL | Create `sound_files` storage bucket |
+| `src/components/sleep/SoundMachine.tsx` | Full rewrite with dropdown, dual audio engine, 3h timer, fade-out |
+| `src/pages/Index.tsx` | Update Sound Machine section header |
 
-## Implementation Details
-
-### 1. Edge Function (`supabase/functions/nhs-chat/index.ts`)
-- Accepts `{ messages: [{role, content}] }` array (conversation history)
-- Auth: validate JWT, require authenticated user
-- System prompt contains curated NHS.uk content covering:
-  - Sleep guidance by age (newborn through 5 years)
-  - Teething (signs, timeline, relief)
-  - Development milestones (0-12 months)
-  - Feeding basics
-  - Common concerns (dribbling, crying, colic, rashes)
-- Instructions: answer ONLY from NHS content, 2-4 sentences, prefix with "From NHS.uk:", reassuring tone
-- Uses Lovable AI Gateway with `google/gemini-3-flash-preview`
-- Streaming SSE response for real-time token delivery
-- Handles 429/402 errors
-
-### 2. Chat Page (`src/pages/AskAI.tsx`)
-- Warm pastel gradient background matching app theme
-- Decorative SVG: cute baby with bib (inline SVG, pastel style) in header
-- Title: "Ask about your baby" in Caveat handwritten font
-- Subtitle: "NHS-guided answers about sleep, development & health"
-- Chat bubbles: user messages right-aligned (primary tint), AI messages left-aligned (card bg with soft shadow)
-- AI messages rendered with `react-markdown` for formatting
-- Text input with placeholder "Ask about your baby's sleep, development, or health…"
-- Send button with sparkle icon
-- Micro-fade animation on new messages (framer-motion)
-- Scroll-to-bottom on new messages
-- Loading state: pulsing dots animation while AI responds
-- Streaming: tokens appear as they arrive
-
-### 3. Bottom Nav Update
-- Add `MessageCircle` (or custom star-chat icon) between Reports and Settings
-- Label: "Ask AI"
-- Same styling as existing nav items
-
-### 4. Route
-- Add `/ask-ai` inside the protected `AppLayout` route group
-
-## What Stays the Same
-- All existing pages, components, data fetching, auth
-- Existing AI sleep review feature (separate edge function)
-- No database tables needed (chat is ephemeral, not persisted)
+## Post-Implementation
+User uploads rain/ocean MP3s to the `sound_files` bucket at paths `rain.mp3` and `ocean.mp3`. The component will construct the public URL from these paths.
 
