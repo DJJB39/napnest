@@ -6,6 +6,7 @@ import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
+import { EditStartTime } from "@/components/sleep/EditStartTime";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { NightGlow } from "@/components/sleep/NightGlow";
 import { useToast } from "@/hooks/use-toast";
@@ -188,6 +189,14 @@ const Index = () => {
         )}
 
         <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
+
+        {activeSleep && (
+          <EditStartTime
+            sleepEntryId={activeSleep.id}
+            currentStart={activeSleep.sleep_start}
+            onUpdated={fetchData}
+          />
+        )}
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
