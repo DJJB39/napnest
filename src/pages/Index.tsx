@@ -189,6 +189,15 @@ const Index = () => {
 
         <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mt-3"
+        >
+          <NightGlow />
+        </motion.div>
+
         {activeSleep && activeSleep.sleep_type === "night" && (
           <NightWakingToggle sleepEntryId={activeSleep.id} />
         )}
