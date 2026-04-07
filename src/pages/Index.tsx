@@ -8,7 +8,8 @@ import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { useToast } from "@/hooks/use-toast";
-import { MoonStars } from "@/components/decorative/MoonStars";
+import { SleepingBabyNest, SleepingCloud } from "@/components/decorative/MoonStars";
+import { motion } from "framer-motion";
 
 export interface Child {
   id: string;
@@ -99,8 +100,8 @@ const Index = () => {
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80dvh] p-6 text-center">
-        <MoonStars className="w-24 h-24 mb-4 opacity-50" />
-        <h2 className="text-lg font-heading font-semibold mb-2">No child profile yet</h2>
+        <SleepingBabyNest className="w-48 h-40 mb-6 opacity-60" />
+        <h2 className="text-xl font-display font-bold mb-2">No child profile yet</h2>
         <p className="text-muted-foreground text-sm">Please complete onboarding to get started.</p>
       </div>
     );
@@ -110,35 +111,64 @@ const Index = () => {
   const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
 
   return (
-    <div className="flex flex-col items-center px-4 pt-8 relative">
-      {/* Decorative */}
-      <MoonStars className="absolute top-2 right-2 w-16 h-16 opacity-20" />
+    <div className="flex flex-col items-center px-4 pt-8 pb-4 relative grain-overlay">
+      {/* Floating decorative illustrations */}
+      <SleepingCloud className="absolute top-2 right-2 w-20 h-14 opacity-15 pointer-events-none" />
+      <SleepingBabyNest className="absolute -top-2 -right-4 w-28 h-24 opacity-10 pointer-events-none" />
 
       {/* Header */}
-      <div className="text-center mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-6 z-10"
+      >
         <p className="text-muted-foreground text-sm">Tracking</p>
-        <h1 className="text-xl font-heading font-bold">{child.name} 🌙</h1>
+        <h1 className="text-2xl font-display font-bold">{child.name} 🌙</h1>
+      </motion.div>
+
+      <div className="z-10 flex flex-col items-center w-full max-w-sm">
+        {!activeSleep && lastWakeTime && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+            <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
+          </motion.div>
+        )}
+
+        <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
+
+        {activeSleep && activeSleep.sleep_type === "night" && (
+          <NightWakingToggle sleepEntryId={activeSleep.id} />
+        )}
+
+        {/* Sleep Timer section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-6 w-full flex flex-col items-center"
+        >
+          <SleepTimer />
+        </motion.div>
+
+        {/* Sound Machine section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 w-full flex flex-col items-center"
+        >
+          <h2 className="text-lg font-display font-bold text-center mb-3 text-foreground">🎵 Sound Machine</h2>
+          <SoundMachine />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="w-full"
+        >
+          <TodaySummary entries={todayEntries} />
+        </motion.div>
       </div>
-
-      {!activeSleep && lastWakeTime && (
-        <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
-      )}
-
-      <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
-
-      {activeSleep && activeSleep.sleep_type === "night" && (
-        <NightWakingToggle sleepEntryId={activeSleep.id} />
-      )}
-
-      <div className="mt-6">
-        <SleepTimer />
-      </div>
-
-      <div className="mt-4">
-        <SoundMachine />
-      </div>
-
-      <TodaySummary entries={todayEntries} />
     </div>
   );
 };

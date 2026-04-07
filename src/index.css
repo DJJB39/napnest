@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -44,6 +44,12 @@
 
     --coral: 4 90% 68%;
     --coral-foreground: 0 0% 100%;
+
+    --orange-warm: 28 90% 55%;
+    --orange-warm-foreground: 0 0% 100%;
+
+    --green-glow: 155 60% 48%;
+    --green-glow-foreground: 0 0% 100%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
@@ -101,6 +107,12 @@
     --coral: 4 90% 68%;
     --coral-foreground: 210 40% 96%;
 
+    --orange-warm: 28 90% 55%;
+    --orange-warm-foreground: 222 47% 11%;
+
+    --green-glow: 155 60% 48%;
+    --green-glow-foreground: 222 47% 11%;
+
     --border: 217 33% 22%;
     --input: 217 33% 22%;
     --ring: 168 40% 54%;
@@ -149,12 +161,40 @@
 }
 
 @layer utilities {
+  .font-display {
+    font-family: 'Caveat', cursive;
+  }
+
   .gradient-page {
-    background: linear-gradient(170deg, hsl(210 60% 95%) 0%, hsl(330 40% 97%) 50%, hsl(210 50% 96%) 100%);
+    background: linear-gradient(170deg, hsl(210 60% 95%) 0%, hsl(330 40% 95%) 40%, hsl(210 50% 96%) 100%);
   }
 
   .dark .gradient-page {
     background: linear-gradient(170deg, hsl(222 47% 11%) 0%, hsl(240 30% 14%) 50%, hsl(222 47% 11%) 100%);
+  }
+
+  .gradient-hero {
+    background: linear-gradient(170deg, hsl(210 60% 94%) 0%, hsl(330 50% 93%) 50%, hsl(270 40% 94%) 100%);
+  }
+
+  .dark .gradient-hero {
+    background: linear-gradient(170deg, hsl(222 47% 11%) 0%, hsl(280 30% 16%) 50%, hsl(222 47% 11%) 100%);
+  }
+
+  .grain-overlay {
+    position: relative;
+  }
+
+  .grain-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    z-index: 0;
   }
 
   .card-dreamy {
@@ -171,6 +211,11 @@
                 0 0 48px 12px hsl(168 40% 54% / 0.1);
   }
 
+  .glow-green {
+    box-shadow: 0 0 24px 6px hsl(155 60% 48% / 0.35),
+                0 0 48px 12px hsl(155 60% 48% / 0.15);
+  }
+
   .glow-coral {
     box-shadow: 0 0 24px 6px hsl(4 90% 68% / 0.25),
                 0 0 48px 12px hsl(4 90% 68% / 0.1);
@@ -181,11 +226,16 @@
                 0 0 48px 12px hsl(239 84% 67% / 0.1);
   }
 
+  .glow-orange {
+    box-shadow: 0 0 20px 4px hsl(28 90% 55% / 0.3),
+                0 0 40px 8px hsl(28 90% 55% / 0.1);
+  }
+
   .btn-hover {
     @apply transition-all duration-200 hover:scale-105 active:scale-95;
   }
 
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
   }
 }
