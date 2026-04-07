@@ -7,6 +7,7 @@ import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
+import { NightGlow } from "@/components/sleep/NightGlow";
 import { useToast } from "@/hooks/use-toast";
 import { SleepingBabyNest, SleepingCloud, TinyMoonPhases } from "@/components/decorative/MoonStars";
 import { motion } from "framer-motion";
@@ -187,6 +188,15 @@ const Index = () => {
         )}
 
         <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mt-3"
+        >
+          <NightGlow />
+        </motion.div>
 
         {activeSleep && activeSleep.sleep_type === "night" && (
           <NightWakingToggle sleepEntryId={activeSleep.id} />
