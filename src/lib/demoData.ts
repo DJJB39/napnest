@@ -15,7 +15,7 @@ const now = new Date();
 const demoDob = new Date(now);
 demoDob.setMonth(demoDob.getMonth() - 4);
 export const DEMO_DOB = demoDob.toISOString().split("T")[0];
-export const DEMO_CHILD_NAME = "Lily";
+export const DEMO_CHILD_NAME = "Baby";
 
 interface DemoWaking {
   wake_time: string;

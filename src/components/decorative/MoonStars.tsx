@@ -1,9 +1,7 @@
 export const MoonStars = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Crescent moon */}
     <circle cx="100" cy="100" r="50" fill="hsl(38 80% 75%)" />
     <circle cx="120" cy="85" r="42" fill="hsl(210 60% 95%)" className="dark:fill-[hsl(222,47%,11%)]" />
-    {/* Stars */}
     <circle cx="45" cy="40" r="3" fill="hsl(38 80% 75%)" className="animate-twinkle" />
     <circle cx="160" cy="55" r="2.5" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "0.5s" }} />
     <circle cx="140" cy="150" r="2" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "1s" }} />
@@ -21,69 +19,95 @@ export const FloatingZzz = () => (
 );
 
 export const SleepingBabyNest = ({ className = "" }: { className?: string }) => (
-  <svg viewBox="0 0 300 280" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Background glow */}
-    <circle cx="150" cy="140" r="120" fill="hsl(210 60% 95%)" opacity="0.4" />
+  <svg viewBox="0 0 320 280" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Soft background glow */}
+    <ellipse cx="160" cy="150" rx="140" ry="120" fill="hsl(270 30% 95%)" opacity="0.3" />
 
-    {/* Crescent moon top-right */}
-    <circle cx="230" cy="50" r="30" fill="hsl(38 80% 78%)" />
-    <circle cx="245" cy="40" r="26" fill="hsl(270 40% 94%)" className="dark:fill-[hsl(222,47%,11%)]" />
+    {/* Large crescent moon with sleeping face */}
+    <circle cx="248" cy="48" r="38" fill="hsl(38 85% 78%)" />
+    <circle cx="268" cy="36" r="32" fill="hsl(270 40% 94%)" className="dark:fill-[hsl(222,47%,11%)]" />
+    {/* Moon sleeping eyes */}
+    <path d="M236 46 Q240 51 244 46" stroke="hsl(30 40% 45%)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M248 44 Q252 49 256 44" stroke="hsl(30 40% 45%)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    {/* Moon smile */}
+    <path d="M240 54 Q248 60 256 54" stroke="hsl(30 40% 50%)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+    {/* Moon blush */}
+    <circle cx="234" cy="52" r="4" fill="hsl(340 60% 80%)" opacity="0.4" />
+    <circle cx="260" cy="50" r="4" fill="hsl(340 60% 80%)" opacity="0.4" />
 
-    {/* Stars scattered */}
-    <circle cx="60" cy="30" r="3" fill="hsl(38 80% 75%)" className="animate-twinkle" />
-    <circle cx="120" cy="18" r="2" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "0.7s" }} />
-    <circle cx="200" cy="25" r="2.5" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "1.2s" }} />
-    <circle cx="270" cy="90" r="2" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "0.3s" }} />
-    <circle cx="40" cy="80" r="2.5" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "1.8s" }} />
-    <circle cx="260" cy="140" r="1.5" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "2.2s" }} />
-    {/* Star sparkle shapes */}
-    <path d="M85 50 L87 44 L89 50 L95 48 L89 52 L91 58 L87 54 L83 58 L85 52 L79 48Z" fill="hsl(38 80% 80%)" className="animate-twinkle" style={{ animationDelay: "0.5s" }} />
-    <path d="M180 10 L181.5 6 L183 10 L187 9 L183 12 L184.5 16 L181.5 13 L178.5 16 L180 12 L176 9Z" fill="hsl(38 80% 80%)" className="animate-twinkle" style={{ animationDelay: "1.5s" }} />
+    {/* Stars — 4-point sparkle shapes */}
+    <path d="M50 28 L52 20 L54 28 L62 26 L54 30 L56 38 L52 32 L48 38 L50 30 L42 26Z" fill="hsl(38 85% 80%)" className="animate-twinkle" style={{ animationDelay: "0s" }} />
+    <path d="M110 12 L112 6 L114 12 L120 10 L114 14 L116 20 L112 16 L108 20 L110 14 L104 10Z" fill="hsl(38 85% 80%)" className="animate-twinkle" style={{ animationDelay: "0.8s" }} />
+    <path d="M190 18 L191.5 13 L193 18 L198 16.5 L193 20 L194.5 25 L191.5 22 L188.5 25 L190 20 L185 16.5Z" fill="hsl(38 85% 82%)" className="animate-twinkle" style={{ animationDelay: "1.4s" }} />
+    <circle cx="285" cy="95" r="2.5" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "0.3s" }} />
+    <circle cx="30" cy="70" r="3" fill="hsl(38 80% 75%)" className="animate-twinkle" style={{ animationDelay: "1.8s" }} />
+    <circle cx="75" cy="55" r="2" fill="hsl(38 80% 78%)" className="animate-twinkle" style={{ animationDelay: "2.2s" }} />
+    <circle cx="295" cy="130" r="2" fill="hsl(38 80% 78%)" className="animate-twinkle" style={{ animationDelay: "0.6s" }} />
+    <path d="M300 60 L301 56 L302 60 L306 59 L302 62 L303 66 L301 63 L299 66 L300 62 L296 59Z" fill="hsl(38 85% 82%)" className="animate-twinkle" style={{ animationDelay: "2s" }} />
 
-    {/* Fluffy cloud nest - layered puffs */}
-    <ellipse cx="150" cy="210" rx="110" ry="40" fill="hsl(210 40% 92%)" />
-    <circle cx="70" cy="195" r="30" fill="hsl(210 50% 90%)" />
-    <circle cx="110" cy="185" r="35" fill="hsl(210 45% 92%)" />
-    <circle cx="155" cy="182" r="38" fill="hsl(330 30% 93%)" />
-    <circle cx="200" cy="185" r="34" fill="hsl(210 45% 91%)" />
-    <circle cx="235" cy="195" r="28" fill="hsl(210 50% 90%)" />
-    {/* Inner nest softness */}
-    <ellipse cx="150" cy="200" rx="80" ry="28" fill="hsl(330 40% 95%)" />
+    {/* Fluffy cloud nest — many overlapping puffs */}
+    <ellipse cx="160" cy="225" rx="125" ry="38" fill="hsl(210 50% 92%)" />
+    <circle cx="55" cy="210" r="32" fill="hsl(210 55% 90%)" />
+    <circle cx="95" cy="198" r="36" fill="hsl(270 25% 93%)" />
+    <circle cx="140" cy="192" r="42" fill="hsl(330 35% 94%)" />
+    <circle cx="185" cy="195" r="38" fill="hsl(210 45% 92%)" />
+    <circle cx="225" cy="200" r="34" fill="hsl(270 20% 93%)" />
+    <circle cx="260" cy="210" r="30" fill="hsl(210 55% 90%)" />
+    {/* Extra small puffs for volume */}
+    <circle cx="72" cy="220" r="20" fill="hsl(330 25% 94%)" />
+    <circle cx="248" cy="222" r="18" fill="hsl(330 25% 94%)" />
+    {/* Inner nest warmth */}
+    <ellipse cx="160" cy="212" rx="85" ry="26" fill="hsl(330 40% 95%)" />
+    <ellipse cx="160" cy="215" rx="65" ry="18" fill="hsl(330 45% 96%)" />
 
-    {/* Baby body (blanket) - soft blue-pink gradient look */}
-    <ellipse cx="150" cy="185" rx="45" ry="25" fill="hsl(210 60% 88%)" />
-    <ellipse cx="150" cy="185" rx="40" ry="22" fill="hsl(330 40% 92%)" />
+    {/* Baby blanket — blue with star pattern */}
+    <ellipse cx="160" cy="196" rx="52" ry="28" fill="hsl(210 55% 86%)" />
+    <ellipse cx="160" cy="196" rx="46" ry="24" fill="hsl(220 50% 88%)" />
+    {/* Star pattern on blanket */}
+    <path d="M135 192 L136 189 L137 192 L140 191 L137 194 L138 197 L136 195 L134 197 L135 194 L132 191Z" fill="hsl(38 80% 82%)" opacity="0.5" />
+    <path d="M175 188 L176 185 L177 188 L180 187 L177 190 L178 193 L176 191 L174 193 L175 190 L172 187Z" fill="hsl(38 80% 82%)" opacity="0.5" />
+    <path d="M155 202 L156 199 L157 202 L160 201 L157 204 L158 207 L156 205 L154 207 L155 204 L152 201Z" fill="hsl(38 80% 82%)" opacity="0.4" />
 
     {/* Baby head */}
-    <circle cx="150" cy="152" r="26" fill="hsl(25 60% 85%)" />
-    {/* Hair wisps */}
-    <path d="M133 140 Q138 125 150 130 Q155 120 160 132 Q168 126 167 140" stroke="hsl(30 40% 55%)" strokeWidth="2" fill="none" strokeLinecap="round" />
+    <circle cx="160" cy="160" r="30" fill="hsl(25 55% 85%)" />
+    {/* Hair wisps — softer, more */}
+    <path d="M140 148 Q145 128 158 138 Q162 125 168 140 Q178 130 176 148" stroke="hsl(25 35% 50%)" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    <path d="M145 145 Q150 135 155 142" stroke="hsl(25 30% 55%)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
 
-    {/* Eyes closed - cute curves */}
-    <path d="M139 152 Q143 157 147 152" stroke="hsl(222 47% 30%)" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-    <path d="M153 152 Q157 157 161 152" stroke="hsl(222 47% 30%)" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    {/* Eyes closed — cute curves with lashes */}
+    <path d="M147 160 Q152 166 157 160" stroke="hsl(222 47% 25%)" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <path d="M163 160 Q168 166 173 160" stroke="hsl(222 47% 25%)" strokeWidth="2" strokeLinecap="round" fill="none" />
     {/* Eyelashes */}
-    <line x1="139" y1="152" x2="137" y2="149" stroke="hsl(222 47% 30%)" strokeWidth="1" strokeLinecap="round" />
-    <line x1="161" y1="152" x2="163" y2="149" stroke="hsl(222 47% 30%)" strokeWidth="1" strokeLinecap="round" />
+    <line x1="147" y1="160" x2="144" y2="156" stroke="hsl(222 47% 30%)" strokeWidth="1.2" strokeLinecap="round" />
+    <line x1="150" y1="159" x2="148" y2="155" stroke="hsl(222 47% 30%)" strokeWidth="1" strokeLinecap="round" />
+    <line x1="173" y1="160" x2="176" y2="156" stroke="hsl(222 47% 30%)" strokeWidth="1.2" strokeLinecap="round" />
+    <line x1="170" y1="159" x2="172" y2="155" stroke="hsl(222 47% 30%)" strokeWidth="1" strokeLinecap="round" />
 
-    {/* Tiny smile */}
-    <path d="M145 161 Q150 166 155 161" stroke="hsl(340 60% 65%)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    {/* Tiny nose */}
+    <circle cx="160" cy="165" r="1.5" fill="hsl(25 40% 75%)" />
 
-    {/* Cheek blush - rosy circles */}
-    <circle cx="136" cy="158" r="5" fill="hsl(340 60% 80%)" opacity="0.5" />
-    <circle cx="164" cy="158" r="5" fill="hsl(340 60% 80%)" opacity="0.5" />
+    {/* Sweet smile */}
+    <path d="M153 172 Q160 179 167 172" stroke="hsl(340 55% 60%)" strokeWidth="1.8" strokeLinecap="round" fill="none" />
 
-    {/* Little hand peeking from blanket */}
-    <circle cx="118" cy="178" r="5" fill="hsl(25 60% 85%)" />
-    <circle cx="114" cy="176" r="2.5" fill="hsl(25 55% 82%)" />
+    {/* Rosy cheeks */}
+    <circle cx="142" cy="168" r="6" fill="hsl(340 65% 82%)" opacity="0.5" />
+    <circle cx="178" cy="168" r="6" fill="hsl(340 65% 82%)" opacity="0.5" />
 
-    {/* Tiny star on blanket */}
-    <path d="M170 178 L171.5 174 L173 178 L177 177 L173.5 180 L175 184 L171.5 181.5 L168 184 L169.5 180 L166 177Z" fill="hsl(38 80% 75%)" opacity="0.6" />
+    {/* Little hands peeking */}
+    <circle cx="122" cy="190" r="6" fill="hsl(25 55% 84%)" />
+    <circle cx="117" cy="187" r="3" fill="hsl(25 50% 82%)" />
+    <circle cx="198" cy="192" r="5.5" fill="hsl(25 55% 84%)" />
+    <circle cx="203" cy="189" r="2.8" fill="hsl(25 50% 82%)" />
 
     {/* Floating Zzz above baby */}
-    <text x="180" y="120" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="16" fontWeight="bold" opacity="0.7" className="animate-float-up" style={{ animationIterationCount: "infinite" }}>Z</text>
-    <text x="195" y="100" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="22" fontWeight="bold" opacity="0.5" className="animate-float-up" style={{ animationDelay: "0.6s", animationIterationCount: "infinite" }}>z</text>
-    <text x="210" y="80" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="28" fontWeight="bold" opacity="0.3" className="animate-float-up" style={{ animationDelay: "1.2s", animationIterationCount: "infinite" }}>Z</text>
+    <text x="200" y="128" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="18" fontWeight="bold" opacity="0.7" className="animate-float-up" style={{ animationIterationCount: "infinite" }}>Z</text>
+    <text x="216" y="105" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="24" fontWeight="bold" opacity="0.5" className="animate-float-up" style={{ animationDelay: "0.6s", animationIterationCount: "infinite" }}>z</text>
+    <text x="230" y="82" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="30" fontWeight="bold" opacity="0.3" className="animate-float-up" style={{ animationDelay: "1.2s", animationIterationCount: "infinite" }}>Z</text>
+
+    {/* Tiny floating cloud near Zzz */}
+    <ellipse cx="210" cy="115" rx="12" ry="6" fill="hsl(210 40% 92%)" opacity="0.3" />
+    <circle cx="204" cy="112" r="5" fill="hsl(210 40% 93%)" opacity="0.25" />
+    <circle cx="216" cy="112" r="4.5" fill="hsl(210 40% 93%)" opacity="0.25" />
   </svg>
 );
 
@@ -93,8 +117,31 @@ export const SleepingCloud = ({ className = "" }: { className?: string }) => (
     <circle cx="60" cy="40" r="28" fill="hsl(330 30% 94%)" />
     <circle cx="88" cy="48" r="20" fill="hsl(210 45% 91%)" />
     <ellipse cx="60" cy="60" rx="45" ry="14" fill="hsl(210 50% 93%)" />
-    {/* Tiny Zzz */}
     <text x="68" y="28" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="12" fontWeight="bold" opacity="0.5" className="animate-float-up" style={{ animationIterationCount: "infinite" }}>z</text>
     <text x="78" y="18" fill="hsl(168 40% 54%)" fontFamily="Caveat, cursive" fontSize="16" fontWeight="bold" opacity="0.3" className="animate-float-up" style={{ animationDelay: "0.5s", animationIterationCount: "infinite" }}>Z</text>
   </svg>
+);
+
+export const TinyMoonPhases = ({ className = "" }: { className?: string }) => (
+  <div className={`flex items-center gap-2 ${className}`}>
+    {/* New moon */}
+    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="hsl(215 16% 47%)" opacity="0.3" /></svg>
+    {/* Waxing crescent */}
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <circle cx="7" cy="7" r="6" fill="hsl(38 80% 75%)" />
+      <circle cx="10" cy="7" r="5.5" fill="hsl(215 16% 47%)" opacity="0.3" />
+    </svg>
+    {/* First quarter */}
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <circle cx="7" cy="7" r="6" fill="hsl(38 80% 75%)" />
+      <rect x="7" y="1" width="6" height="12" fill="hsl(215 16% 47%)" opacity="0.3" rx="0" />
+    </svg>
+    {/* Full moon */}
+    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="hsl(38 85% 78%)" /></svg>
+    {/* Waning crescent */}
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <circle cx="7" cy="7" r="6" fill="hsl(38 80% 75%)" />
+      <circle cx="4" cy="7" r="5.5" fill="hsl(215 16% 47%)" opacity="0.3" />
+    </svg>
+  </div>
 );
