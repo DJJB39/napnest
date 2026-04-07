@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, AlertCircle, Sparkles, X } from "lucide-react";
+import { Moon, Sun, AlertCircle, Sparkles, X, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SleepButton } from "@/components/sleep/SleepButton";
 import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { WeeklySummary } from "@/components/reports/WeeklySummary";
 import { SleepTimeline } from "@/components/reports/SleepTimeline";
-import { MoonStars, SleepingCloud } from "@/components/decorative/MoonStars";
+import { SleepingCloud, TinyMoonPhases } from "@/components/decorative/MoonStars";
 import { BarChart, Bar, XAxis as RXAxis, YAxis as RYAxis, ResponsiveContainer, ReferenceLine, Tooltip, Area, AreaChart } from "recharts";
 import {
   demoTodayEntries, demoThisWeek, demoLastWeek, demoNhsRange,
@@ -39,6 +39,13 @@ const Demo = () => {
     weekAgo.setDate(weekAgo.getDate() - 7);
     return d >= weekAgo;
   });
+
+  // Wake window predictor for demo
+  const awakeMinutes = Math.floor((Date.now() - new Date(demoLastWakeTime).getTime()) / 60000);
+  const avgWakeWindow = 120; // ~2h for 4 month old
+  const minsUntilNap = Math.max(0, avgWakeWindow - awakeMinutes);
+  const napColor = minsUntilNap > 30 ? "text-success" : minsUntilNap > 15 ? "text-warning" : "text-coral";
+  const napBg = minsUntilNap > 30 ? "bg-success/10" : minsUntilNap > 15 ? "bg-warning/10" : "bg-coral/10";
 
   return (
     <div className="min-h-[100dvh] pb-24 gradient-page grain-overlay">
@@ -74,8 +81,18 @@ const Demo = () => {
             <div className="text-center mb-2">
               <p className="text-muted-foreground text-sm">Tracking</p>
               <h1 className="text-2xl font-display font-bold">{DEMO_CHILD_NAME} 🌙</h1>
+              <TinyMoonPhases className="justify-center mt-1" />
             </div>
             <WakeWindowTimer lastWakeTime={demoLastWakeTime} dob={DEMO_DOB} />
+
+            {/* AI Wake Window Predictor Badge */}
+            <div className={`${napBg} rounded-2xl px-4 py-2 flex items-center gap-2`}>
+              <Clock className={`w-4 h-4 ${napColor}`} />
+              <span className={`text-sm font-heading font-semibold ${napColor}`}>
+                {minsUntilNap === 0 ? "Nap time now!" : `Next nap in ~${minsUntilNap} mins`}
+              </span>
+            </div>
+
             <div className="pointer-events-none opacity-90">
               <SleepButton isSleeping={false} onToggle={() => {}} />
             </div>
@@ -85,7 +102,10 @@ const Demo = () => {
 
         {activeTab === "reports" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
+            <div>
+              <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
+              <TinyMoonPhases className="mt-1" />
+            </div>
             <WeeklySummary thisWeek={demoThisWeek} lastWeek={demoLastWeek} />
 
             <Card className="card-dreamy border-0">
@@ -96,7 +116,7 @@ const Demo = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demoThisWeek}>
                     <RXAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <RYAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} />
+                    <RYAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
                     <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
                     <ReferenceLine y={demoNhsRange.max} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" />
                     <ReferenceLine y={demoNhsRange.min} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" label={{ value: "NHS", fill: "hsl(160 60% 45%)", fontSize: 10, position: "right" }} />
@@ -115,7 +135,7 @@ const Demo = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={nhsChartData}>
                     <RXAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <RYAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, "auto"]} />
+                    <RYAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
                     <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
                     <Area type="monotone" dataKey="nhsMax" stackId="nhs" stroke="none" fill="hsl(160 60% 45% / 0.1)" />
                     <Area type="monotone" dataKey="nhsMin" stackId="nhs" stroke="none" fill="hsl(0 0% 100%)" />
