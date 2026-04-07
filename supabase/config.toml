@@ -1,1 +1,5 @@
 project_id = "jnwnoissfsabogtzpppm"
+
+[auth.sessions]
+timebox = "168h"
+inactivity_timeout = "0s"
