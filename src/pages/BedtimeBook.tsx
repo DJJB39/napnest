@@ -223,7 +223,7 @@ const BedtimeBook = () => {
   }
 
   // Chapter list
-  const chapters = Array.from({ length: 24 }, (_, i) => i);
+  const chapters = Array.from({ length: 24 }, (_, i) => i); // 0-23
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
@@ -239,7 +239,7 @@ const BedtimeBook = () => {
         <BookOpen className="w-10 h-10 mx-auto mb-2 text-primary" />
         <h1 className="text-xl font-display font-bold">The Materia Saga</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {childName}&apos;s bedtime adventure — 24 chapters ✨
+          {childName}&apos;s bedtime adventure — 24 chapters, Months 0–23 ✨
         </p>
       </motion.div>
 
