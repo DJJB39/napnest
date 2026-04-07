@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { Home, Clock, BarChart3, Settings } from "lucide-react";
+import { Home, Clock, BarChart3, MessageCircle, Settings } from "lucide-react";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/history", icon: Clock, label: "History" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
+  { to: "/ask-ai", icon: MessageCircle, label: "Ask AI" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
