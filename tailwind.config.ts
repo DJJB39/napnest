@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         heading: ["Poppins", "sans-serif"],
+        display: ["Caveat", "cursive"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -71,6 +72,14 @@ export default {
         coral: {
           DEFAULT: "hsl(var(--coral))",
           foreground: "hsl(var(--coral-foreground))",
+        },
+        "orange-warm": {
+          DEFAULT: "hsl(var(--orange-warm))",
+          foreground: "hsl(var(--orange-warm-foreground))",
+        },
+        "green-glow": {
+          DEFAULT: "hsl(var(--green-glow))",
+          foreground: "hsl(var(--green-glow-foreground))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

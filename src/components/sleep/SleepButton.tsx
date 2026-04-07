@@ -37,7 +37,7 @@ export const SleepButton = ({ isSleeping, sleepStart, onToggle }: SleepButtonPro
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.93 }}
-        className={`relative w-36 h-36 rounded-full flex flex-col items-center justify-center transition-all duration-300 btn-hover ${
+        className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center transition-all duration-300 btn-hover ${
           isSleeping
             ? "bg-gradient-to-br from-night to-nap glow-night"
             : "bg-gradient-to-br from-primary to-primary/70 glow-primary"

@@ -6,7 +6,7 @@ export const AppLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col min-h-[100dvh] max-w-lg mx-auto relative gradient-page">
+    <div className="flex flex-col min-h-[100dvh] max-w-lg mx-auto relative gradient-page grain-overlay">
       <main className="flex-1 pb-20 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div

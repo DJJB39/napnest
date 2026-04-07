@@ -9,7 +9,7 @@ import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { WeeklySummary } from "@/components/reports/WeeklySummary";
 import { SleepTimeline } from "@/components/reports/SleepTimeline";
-import { MoonStars } from "@/components/decorative/MoonStars";
+import { MoonStars, SleepingCloud } from "@/components/decorative/MoonStars";
 import { BarChart, Bar, XAxis as RXAxis, YAxis as RYAxis, ResponsiveContainer, ReferenceLine, Tooltip, Area, AreaChart } from "recharts";
 import {
   demoTodayEntries, demoThisWeek, demoLastWeek, demoNhsRange,
@@ -41,7 +41,7 @@ const Demo = () => {
   });
 
   return (
-    <div className="min-h-[100dvh] pb-24 gradient-page">
+    <div className="min-h-[100dvh] pb-24 gradient-page grain-overlay">
       {/* Demo banner */}
       <div className="bg-primary/10 border-b border-border/50 px-4 py-3 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
@@ -70,10 +70,10 @@ const Demo = () => {
       <div className="px-4 pt-6 space-y-6">
         {activeTab === "dashboard" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center space-y-4 relative">
-            <MoonStars className="absolute top-0 right-0 w-16 h-16 opacity-20" />
+            <SleepingCloud className="absolute top-0 right-0 w-20 h-14 opacity-15" />
             <div className="text-center mb-2">
               <p className="text-muted-foreground text-sm">Tracking</p>
-              <h1 className="text-xl font-heading font-bold">{DEMO_CHILD_NAME} 🌙</h1>
+              <h1 className="text-2xl font-display font-bold">{DEMO_CHILD_NAME} 🌙</h1>
             </div>
             <WakeWindowTimer lastWakeTime={demoLastWakeTime} dob={DEMO_DOB} />
             <div className="pointer-events-none opacity-90">

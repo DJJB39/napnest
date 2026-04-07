@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Volume2, VolumeX, Play, Pause } from "lucide-react";
+import { Volume2, VolumeX, Play, Pause, Waves } from "lucide-react";
 
 type NoiseType = "white" | "brown" | null;
 
@@ -73,23 +73,23 @@ export const SoundMachine = () => {
 
   return (
     <div className="card-dreamy w-full max-w-xs p-5 rounded-2xl space-y-4">
-      <p className="text-xs font-heading font-semibold text-muted-foreground text-center uppercase tracking-wider">Sound Machine</p>
-
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-3">
         <Button
-          size="sm"
+          size="lg"
           variant={activeNoise === "white" ? "default" : "outline"}
-          className="rounded-2xl text-xs btn-hover"
+          className={`rounded-2xl text-sm btn-hover gap-2 ${activeNoise === "white" && isPlaying ? "glow-primary" : ""}`}
           onClick={() => handleToggle("white")}
         >
+          <Waves className="w-4 h-4" />
           White Noise
         </Button>
         <Button
-          size="sm"
+          size="lg"
           variant={activeNoise === "brown" ? "default" : "outline"}
-          className="rounded-2xl text-xs btn-hover"
+          className={`rounded-2xl text-sm btn-hover gap-2 ${activeNoise === "brown" && isPlaying ? "glow-primary" : ""}`}
           onClick={() => handleToggle("brown")}
         >
+          <Waves className="w-4 h-4" />
           Brown Noise
         </Button>
       </div>
@@ -98,7 +98,7 @@ export const SoundMachine = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-center">
             <Button size="sm" variant="ghost" className="rounded-xl btn-hover" onClick={handlePlayPause}>
-              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
             </Button>
           </div>
           <div className="flex items-center gap-3">
