@@ -6,6 +6,7 @@ import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
+import { EditStartTime } from "@/components/sleep/EditStartTime";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { NightGlow } from "@/components/sleep/NightGlow";
 import { useToast } from "@/hooks/use-toast";
