@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Clock, Sparkles, Volume2 } from "lucide-react";
+import { Clock, Sparkles, Volume2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { MoonStars, SleepingBabyNest } from "@/components/decorative/MoonStars";
 
 const Auth = () => {
   const { user } = useAuth();
@@ -56,25 +57,29 @@ const Auth = () => {
   };
 
   const features = [
-    { icon: Clock, title: "Sleep Tracking", desc: "One-tap logging with wake window timers" },
-    { icon: Sparkles, title: "AI Insights", desc: "NHS-aligned tips powered by AI" },
-    { icon: Volume2, title: "Sound Machine", desc: "White & brown noise to soothe your baby" },
+    { icon: Clock, title: "Sleep Tracking", desc: "One-tap logging with wake window timers", color: "bg-primary/15 text-primary" },
+    { icon: Sparkles, title: "AI Insights", desc: "NHS-aligned tips powered by AI", color: "bg-nap/15 text-nap" },
+    { icon: Volume2, title: "Sound Machine", desc: "White & brown noise to soothe your baby", color: "bg-accent/15 text-accent" },
   ];
 
   return (
-    <div className="min-h-[100dvh] flex flex-col">
+    <div className="min-h-[100dvh] flex flex-col gradient-page">
       {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+        {/* Decorative background elements */}
+        <MoonStars className="absolute top-6 right-6 w-24 h-24 opacity-30" />
+        <MoonStars className="absolute bottom-20 left-4 w-16 h-16 opacity-20 rotate-45" />
+
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center text-center max-w-md"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex flex-col items-center text-center max-w-md relative z-10"
         >
-          <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
-            <Moon className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold leading-tight">
+          {/* Baby in nest illustration */}
+          <SleepingBabyNest className="w-32 h-24 mb-6" />
+
+          <h1 className="text-3xl sm:text-4xl font-heading font-bold leading-tight text-foreground">
             NapNest: Track Your Baby's Sleep Like Magic
           </h1>
           <p className="text-muted-foreground mt-3 text-sm sm:text-base">
@@ -86,11 +91,11 @@ const Auth = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-8 flex flex-col sm:flex-row items-center gap-3"
+          className="mt-8 flex flex-col sm:flex-row items-center gap-3 z-10"
         >
           <Button
             size="lg"
-            className="rounded-xl px-8 min-w-[160px]"
+            className="rounded-2xl px-8 min-w-[160px] btn-hover glow-primary font-heading font-semibold"
             onClick={() => { setIsLogin(false); setShowAuth(true); }}
           >
             Sign Up Free
@@ -98,7 +103,7 @@ const Auth = () => {
           <Button
             size="lg"
             variant="outline"
-            className="rounded-xl px-8 min-w-[160px]"
+            className="rounded-2xl px-8 min-w-[160px] btn-hover font-heading font-semibold"
             onClick={() => { setIsLogin(true); setShowAuth(true); }}
           >
             Log In
@@ -109,14 +114,14 @@ const Auth = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-4"
+          className="mt-4 z-10"
         >
           <Button
             variant="ghost"
-            className="text-muted-foreground text-sm hover:text-primary"
+            className="text-coral font-semibold text-sm hover:text-coral/80 btn-hover"
             onClick={() => navigate("/demo")}
           >
-            Try Demo (No Account)
+            🧸 Try Demo (No Account)
           </Button>
         </motion.div>
 
@@ -125,13 +130,13 @@ const Auth = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg sm:max-w-2xl w-full"
+          className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg sm:max-w-2xl w-full z-10"
         >
-          {features.map(({ icon: Icon, title, desc }) => (
-            <Card key={title} className="text-center">
-              <CardContent className="p-4 flex flex-col items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary" />
+          {features.map(({ icon: Icon, title, desc, color }) => (
+            <Card key={title} className="card-dreamy card-hover text-center border-0">
+              <CardContent className="p-5 flex flex-col items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center`}>
+                  <Icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-heading font-semibold">{title}</h3>
                 <p className="text-xs text-muted-foreground">{desc}</p>
@@ -148,7 +153,7 @@ const Auth = () => {
           animate={{ opacity: 1, y: 0 }}
           className="px-4 pb-8"
         >
-          <Card className="max-w-sm mx-auto">
+          <Card className="max-w-sm mx-auto card-dreamy border-0">
             <CardHeader className="text-center">
               <CardTitle className="font-heading">
                 {isForgot ? "Reset Password" : isLogin ? "Welcome Back" : "Create Account"}
@@ -172,6 +177,7 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
+                    className="rounded-xl"
                   />
                 </div>
                 {!isForgot && (
@@ -185,10 +191,11 @@ const Auth = () => {
                       placeholder="••••••••"
                       required
                       minLength={6}
+                      className="rounded-xl"
                     />
                   </div>
                 )}
-                <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+                <Button type="submit" className="w-full rounded-xl btn-hover font-heading font-semibold" disabled={loading}>
                   {loading ? "Loading..." : isForgot ? "Send Reset Link" : isLogin ? "Sign In" : "Create Account"}
                 </Button>
               </form>
