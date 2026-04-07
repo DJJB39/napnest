@@ -7,6 +7,7 @@ import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
+import { NightGlow } from "@/components/sleep/NightGlow";
 import { useToast } from "@/hooks/use-toast";
 import { SleepingBabyNest, SleepingCloud, TinyMoonPhases } from "@/components/decorative/MoonStars";
 import { motion } from "framer-motion";
