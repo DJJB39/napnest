@@ -18,6 +18,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Invite = lazy(() => import("./pages/Invite"));
 const Demo = lazy(() => import("./pages/Demo"));
+const AskAI = lazy(() => import("./pages/AskAI"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/ask-ai" element={<AskAI />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />
