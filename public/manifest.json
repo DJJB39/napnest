@@ -1,6 +1,6 @@
 {
-  "name": "DreamLog",
-  "short_name": "DreamLog",
+  "name": "NapNest",
+  "short_name": "NapNest",
   "description": "Baby Sleep Tracker",
   "start_url": "/",
   "display": "standalone",
