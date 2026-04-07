@@ -1,41 +1,29 @@
 
 
-# Upgrade Sound Machine — Dropdown Selector + Audio Files
+# Fix Sound Machine — No Audio Playing
 
-## Constraint Callout
-**Rain/Ocean MP3s**: I cannot download files from Pixabay automatically. I will create a Supabase storage bucket for sound files and provide the UI that plays from it. **You will need to upload the MP3 files** (rain loop, ocean loop) to the bucket after implementation. Plain white/brown noise and Deep Rumble will remain programmatic (Web Audio API).
+## Root Cause
 
-## What Changes
+`new AudioContext()` starts in a **suspended** state in modern browsers (autoplay policy). The code calls `source.start()` but never calls `ctx.resume()`, so the audio buffer plays into a suspended context — silence.
 
-### 1. Storage Bucket (SQL migration)
-- Create `sound_files` public bucket for MP3 uploads
-- RLS: public read access (anyone can stream), authenticated insert for admin uploads
+Additionally, the `playFile` function silently catches errors (`audio.play().catch(() => {})`), hiding any failures for file-based sounds.
 
-### 2. `SoundMachine.tsx` — Full Rewrite
-**UI overhaul:**
-- Replace two toggle buttons with a `Select` dropdown
-- Categories: "White Noise" group (Plain, Rain, Ocean) and "Brown Noise" group (Plain, Deep Rumble)
-- Cozy raindrop+Zzz icon in header (inline SVG)
-- Play/Pause button, volume slider (keep existing)
-- Active sound name displayed with animated equalizer bars
+## Fix (1 file)
 
-**Audio logic:**
-- **Programmatic sounds** (Plain White, Plain Brown, Deep Rumble): Web Audio API buffer generation, same as current but Deep Rumble uses lower frequency filter
-- **File-based sounds** (Rain, Ocean): Fetch MP3 from Supabase storage bucket URL, play via `HTMLAudioElement` with loop
-- 3-hour auto-stop timer with 30-second fade-out (gain ramp to 0)
-- Volume slider controls both programmatic gain node and HTML audio element volume
+### `src/components/sleep/SoundMachine.tsx`
 
-### 3. `Index.tsx` — Minor
-- Update section header emoji/text to match new design
+1. **`playProgrammatic`**: Add `await ctx.resume()` after creating the AudioContext, before `source.start()`. Make the function `async`.
 
-## Files
+2. **`playFile`**: Add `console.warn` in the catch block so failures aren't silently swallowed. Also log the URL being attempted.
 
-| File | Action |
-|------|--------|
-| Migration SQL | Create `sound_files` storage bucket |
-| `src/components/sleep/SoundMachine.tsx` | Full rewrite with dropdown, dual audio engine, 3h timer, fade-out |
-| `src/pages/Index.tsx` | Update Sound Machine section header |
+3. **`handlePlayPause` resume path**: When resuming from pause, also call `ctx.resume()` explicitly (AudioContext may re-suspend after `suspend()` call).
 
-## Post-Implementation
-User uploads rain/ocean MP3s to the `sound_files` bucket at paths `rain.mp3` and `ocean.mp3`. The component will construct the public URL from these paths.
+### Specific changes:
+- Line 156: `const playProgrammatic = useCallback(async (soundId: SoundId) => {`
+- After line 158 (`const ctx = new AudioContext();`): add `await ctx.resume();`
+- Line 193: Replace empty catch with `console.warn("Could not play sound file:", fileName, err);`
+
+## What Stays the Same
+- All sound definitions, UI, dropdown, volume slider, 3h timer, fade-out logic — unchanged
+- Only adding the missing `resume()` call and better error logging
 
