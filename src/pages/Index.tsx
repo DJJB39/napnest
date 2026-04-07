@@ -1,16 +1,180 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { SleepButton } from "@/components/sleep/SleepButton";
+import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
+import { TodaySummary } from "@/components/sleep/TodaySummary";
+import { useToast } from "@/hooks/use-toast";
+import { Moon } from "lucide-react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+export interface Child {
+  id: string;
+  name: string;
+  date_of_birth: string;
+}
+
+export interface SleepEntry {
+  id: string;
+  child_id: string;
+  sleep_start: string;
+  sleep_end: string | null;
+  sleep_type: string;
+  is_deleted: boolean;
+}
+
+const Index = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [child, setChild] = useState<Child | null>(null);
+  const [activeSleep, setActiveSleep] = useState<SleepEntry | null>(null);
+  const [todayEntries, setTodayEntries] = useState<SleepEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+
+    // Get first child for this user
+    const { data: familyMembers } = await supabase
+      .from("family_members")
+      .select("child_id")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    if (!familyMembers?.length) {
+      setLoading(false);
+      return;
+    }
+
+    const childId = familyMembers[0].child_id;
+    const { data: childData } = await supabase
+      .from("children")
+      .select("*")
+      .eq("id", childId)
+      .single();
+
+    if (childData) setChild(childData);
+
+    // Get today's entries
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const { data: entries } = await supabase
+      .from("sleep_entries")
+      .select("*")
+      .eq("child_id", childId)
+      .eq("is_deleted", false)
+      .gte("sleep_start", todayStart.toISOString())
+      .order("sleep_start", { ascending: false });
+
+    if (entries) {
+      setTodayEntries(entries);
+      const active = entries.find((e) => !e.sleep_end);
+      setActiveSleep(active || null);
+    }
+
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!child) return;
+    const channel = supabase
+      .channel("sleep-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sleep_entries", filter: `child_id=eq.${child.id}` },
+        () => fetchData()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [child, fetchData]);
+
+  const autoClassifySleepType = () => {
+    const hour = new Date().getHours();
+    return hour >= 18 || hour < 6 ? "night" : "nap";
+  };
+
+  const handleToggleSleep = async () => {
+    if (!child) return;
+
+    if (activeSleep) {
+      // Stop sleep
+      const { error } = await supabase
+        .from("sleep_entries")
+        .update({ sleep_end: new Date().toISOString() })
+        .eq("id", activeSleep.id);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        setActiveSleep(null);
+        fetchData();
+      }
+    } else {
+      // Start sleep
+      const { data, error } = await supabase
+        .from("sleep_entries")
+        .insert({
+          child_id: child.id,
+          sleep_start: new Date().toISOString(),
+          sleep_type: autoClassifySleepType(),
+        })
+        .select()
+        .single();
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else if (data) {
+        setActiveSleep(data);
+        fetchData();
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[80dvh]">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!child) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80dvh] p-6 text-center">
+        <Moon className="w-16 h-16 text-muted-foreground mb-4" />
+        <h2 className="text-lg font-heading font-semibold mb-2">No child profile yet</h2>
+        <p className="text-muted-foreground text-sm">Please complete onboarding to get started.</p>
+      </div>
+    );
+  }
+
+  // Find last wake time for wake window
+  const completedEntries = todayEntries.filter((e) => e.sleep_end);
+  const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex flex-col items-center px-4 pt-8">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <p className="text-muted-foreground text-sm">Tracking</p>
+        <h1 className="text-xl font-heading font-bold">{child.name}</h1>
+      </div>
+
+      {/* Wake Window Timer */}
+      {!activeSleep && lastWakeTime && (
+        <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
+      )}
+
+      {/* Hero Sleep Button */}
+      <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
+
+      {/* Today Summary */}
+      <TodaySummary entries={todayEntries} />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
