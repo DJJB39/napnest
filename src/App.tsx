@@ -19,6 +19,8 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Invite = lazy(() => import("./pages/Invite"));
 const Demo = lazy(() => import("./pages/Demo"));
 const AskAI = lazy(() => import("./pages/AskAI"));
+const WhatToExpect = lazy(() => import("./pages/WhatToExpect"));
+const BedtimeBook = lazy(() => import("./pages/BedtimeBook"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();

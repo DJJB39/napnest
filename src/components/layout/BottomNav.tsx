@@ -21,7 +21,7 @@ export const BottomNav = () => {
             to={to}
             end={to === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] rounded-2xl transition-all duration-200 relative ${
+              `flex flex-col items-center justify-center gap-0.5 min-w-[40px] min-h-[44px] rounded-2xl transition-all duration-200 relative ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
