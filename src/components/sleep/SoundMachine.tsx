@@ -77,7 +77,7 @@ export const SoundMachine = () => {
         <Button
           size="lg"
           variant={activeNoise === "white" ? "default" : "outline"}
-          className={`rounded-2xl text-sm btn-hover gap-2 ${activeNoise === "white" && isPlaying ? "glow-primary" : ""}`}
+          className={`rounded-2xl text-sm btn-hover gap-2 transition-shadow duration-500 ${activeNoise === "white" && isPlaying ? "glow-primary animate-pulse-soft" : ""}`}
           onClick={() => handleToggle("white")}
         >
           <Waves className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const SoundMachine = () => {
         <Button
           size="lg"
           variant={activeNoise === "brown" ? "default" : "outline"}
-          className={`rounded-2xl text-sm btn-hover gap-2 ${activeNoise === "brown" && isPlaying ? "glow-primary" : ""}`}
+          className={`rounded-2xl text-sm btn-hover gap-2 transition-shadow duration-500 ${activeNoise === "brown" && isPlaying ? "glow-primary animate-pulse-soft" : ""}`}
           onClick={() => handleToggle("brown")}
         >
           <Waves className="w-4 h-4" />

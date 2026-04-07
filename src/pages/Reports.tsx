@@ -8,6 +8,7 @@ import { Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WeeklySummary } from "@/components/reports/WeeklySummary";
 import { SleepTimeline } from "@/components/reports/SleepTimeline";
+import { TinyMoonPhases } from "@/components/decorative/MoonStars";
 
 interface DayData { day: string; nap: number; night: number; total: number; }
 
@@ -82,12 +83,33 @@ const Reports = () => {
 
   const nhsChartData = thisWeekData.map((d) => ({ ...d, nhsMin: nhsRange.min, nhsMax: nhsRange.max }));
 
+  // Dynamic AI review button label
+  const daysWithData = thisWeekData.filter(d => d.total > 0).length;
+  const dailyAvg = daysWithData > 0 ? (thisWeekData.reduce((s, d) => s + d.total, 0) / daysWithData) : 0;
+  const aiButtonLabel = dailyAvg > 0
+    ? `Avg ${dailyAvg.toFixed(1)}h — Get personalized tips`
+    : "Get AI Review";
+
+  // Sleep vs NHS bar data
+  const sleepVsNhs = dailyAvg > 0 ? {
+    avg: dailyAvg,
+    inRange: dailyAvg >= nhsRange.min && dailyAvg <= nhsRange.max,
+    below: dailyAvg < nhsRange.min,
+    above: dailyAvg > nhsRange.max,
+    pct: Math.min(100, (dailyAvg / 24) * 100),
+    nhsMinPct: (nhsRange.min / 24) * 100,
+    nhsMaxPct: (nhsRange.max / 24) * 100,
+  } : null;
+
   if (loading) return <div className="flex items-center justify-center min-h-[80dvh]"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="px-4 pt-8 pb-4 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
+        <div>
+          <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
+          <TinyMoonPhases className="mt-1" />
+        </div>
         <div className="flex gap-1">
           {[7, 14, 30].map((d) => (
             <Button key={d} size="sm" variant={viewDays === d ? "default" : "ghost"} className="rounded-2xl text-xs h-7 px-3 btn-hover" onClick={() => setViewDays(d)}>{d}d</Button>
@@ -97,13 +119,43 @@ const Reports = () => {
 
       <WeeklySummary thisWeek={thisWeekData} lastWeek={lastWeekData} />
 
+      {/* Sleep vs NHS visual bar */}
+      {sleepVsNhs && (
+        <Card className="card-dreamy border-0">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Sleep vs NHS Range</CardTitle></CardHeader>
+          <CardContent className="pb-5">
+            <div className="relative h-8 bg-secondary rounded-full overflow-hidden">
+              {/* NHS green band */}
+              <div
+                className="absolute top-0 bottom-0 bg-success/20 border-l border-r border-success/40"
+                style={{ left: `${sleepVsNhs.nhsMinPct}%`, width: `${sleepVsNhs.nhsMaxPct - sleepVsNhs.nhsMinPct}%` }}
+              />
+              {/* Avg marker */}
+              <div
+                className={`absolute top-0 bottom-0 w-1.5 rounded-full ${sleepVsNhs.inRange ? "bg-success" : sleepVsNhs.below ? "bg-coral" : "bg-warning"}`}
+                style={{ left: `${sleepVsNhs.pct}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
+              <span>0h</span>
+              <span className="text-success font-semibold">{nhsRange.min}–{nhsRange.max}h NHS</span>
+              <span>24h</span>
+            </div>
+            <p className={`text-xs mt-2 font-heading font-semibold ${sleepVsNhs.inRange ? "text-success" : sleepVsNhs.below ? "text-coral" : "text-warning"}`}>
+              {sleepVsNhs.inRange ? "✅ In NHS range" : sleepVsNhs.below ? "⚠️ Below NHS range" : "⚠️ Above NHS range"}
+              {" — "}avg {dailyAvg.toFixed(1)}h/day
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="card-dreamy border-0">
         <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Daily Sleep</CardTitle></CardHeader>
         <CardContent className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeekData}>
               <XAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} />
+              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
               <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
               <ReferenceLine y={nhsRange.max} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" />
               <ReferenceLine y={nhsRange.min} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" label={{ value: "NHS", fill: "hsl(160 60% 45%)", fontSize: 10, position: "right" }} />
@@ -115,12 +167,12 @@ const Reports = () => {
       </Card>
 
       <Card className="card-dreamy border-0">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Sleep vs NHS Range</CardTitle></CardHeader>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Sleep Trend</CardTitle></CardHeader>
         <CardContent className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={nhsChartData}>
               <XAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, "auto"]} />
+              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
               <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
               <Area type="monotone" dataKey="nhsMax" stackId="nhs" stroke="none" fill="hsl(160 60% 45% / 0.1)" />
               <Area type="monotone" dataKey="nhsMin" stackId="nhs" stroke="none" fill="hsl(0 0% 100%)" />
@@ -143,7 +195,7 @@ const Reports = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <Button onClick={handleAiReview} disabled={aiLoading} className="w-full rounded-2xl btn-hover font-heading font-semibold" variant="outline">
-            {aiLoading ? "Analysing…" : "Get AI Review"}
+            {aiLoading ? "Analysing…" : aiButtonLabel}
           </Button>
           {aiReview && (
             <div className="space-y-2">
