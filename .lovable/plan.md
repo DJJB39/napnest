@@ -1,29 +1,42 @@
 
 
-# Fix Sound Machine — No Audio Playing
+# Add "Night Glow" Red Tint Mode
 
-## Root Cause
+## What It Does
+A button placed directly below the SleepButton that activates a full-screen red tint overlay — simulating a "night light" mode to protect baby's (and parent's) eyes during nighttime feeds/checks. Auto-off after 30 minutes, toggle off on second tap.
 
-`new AudioContext()` starts in a **suspended** state in modern browsers (autoplay policy). The code calls `source.start()` but never calls `ctx.resume()`, so the audio buffer plays into a suspended context — silence.
+## Implementation
 
-Additionally, the `playFile` function silently catches errors (`audio.play().catch(() => {})`), hiding any failures for file-based sounds.
+### 1. New Component: `src/components/sleep/NightGlow.tsx`
 
-## Fix (1 file)
+**State**: `active` boolean, `timerRef` for 30-min auto-off.
 
-### `src/components/sleep/SoundMachine.tsx`
+**Button UI**:
+- Warm lantern-style button: rounded pill with soft red/coral background (`bg-coral/15`), red icon (Lucide `Flame` or custom lantern SVG), label "Night Glow"
+- Subtle glow shadow when active (`glow-coral`)
+- Positioned inline (not floating), placed right after SleepButton in the layout
 
-1. **`playProgrammatic`**: Add `await ctx.resume()` after creating the AudioContext, before `source.start()`. Make the function `async`.
+**When active — renders a portal/fixed overlay**:
+- `position: fixed; inset: 0; z-index: 999; pointer-events: none`
+- `background: #ff0000; opacity: 0.3`
+- Applies `filter: brightness(0.4) saturate(0.2)` to the `#root` element via `document.getElementById('root').style.filter`
+- Fade-in/out via CSS transition (`transition: opacity 2s ease`)
+- Corner Zzz animation: small floating "Zzz" text in bottom-right, animated with CSS keyframes (float up and fade)
 
-2. **`playFile`**: Add `console.warn` in the catch block so failures aren't silently swallowed. Also log the URL being attempted.
+**iOS popup**: On first activation, check `navigator.userAgent` for iPhone/iPad. If iOS, show a one-time toast/dialog: "For an even gentler glow, go to Settings > Accessibility > Display > Color Filters > Color Tint > Red." Store dismissal in `localStorage`.
 
-3. **`handlePlayPause` resume path**: When resuming from pause, also call `ctx.resume()` explicitly (AudioContext may re-suspend after `suspend()` call).
+**30-min auto-off**: `setTimeout` of 30 minutes clears the overlay and resets filter. Cleanup on unmount.
 
-### Specific changes:
-- Line 156: `const playProgrammatic = useCallback(async (soundId: SoundId) => {`
-- After line 158 (`const ctx = new AudioContext();`): add `await ctx.resume();`
-- Line 193: Replace empty catch with `console.warn("Could not play sound file:", fileName, err);`
+**No battery concerns**: Pure CSS overlay + filter, no canvas/WebGL.
 
-## What Stays the Same
-- All sound definitions, UI, dropdown, volume slider, 3h timer, fade-out logic — unchanged
-- Only adding the missing `resume()` call and better error logging
+### 2. Update `src/pages/Index.tsx`
+
+Insert `<NightGlow />` directly after the `<SleepButton />` line (line 189), wrapped in a motion.div with fade-in animation, before the NightWakingToggle section.
+
+## Files
+
+| File | Action |
+|------|--------|
+| `src/components/sleep/NightGlow.tsx` | Create — button + overlay + iOS popup + Zzz animation |
+| `src/pages/Index.tsx` | Edit — import and place NightGlow below SleepButton |
 
