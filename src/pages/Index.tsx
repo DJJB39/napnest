@@ -5,6 +5,8 @@ import { SleepButton } from "@/components/sleep/SleepButton";
 import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
+import { SleepTimer } from "@/components/sleep/SleepTimer";
+import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { useToast } from "@/hooks/use-toast";
 import { Moon } from "lucide-react";
 
@@ -172,6 +174,16 @@ const Index = () => {
       {activeSleep && activeSleep.sleep_type === "night" && (
         <NightWakingToggle sleepEntryId={activeSleep.id} />
       )}
+
+      {/* Sleep Timer */}
+      <div className="mt-6">
+        <SleepTimer />
+      </div>
+
+      {/* Sound Machine */}
+      <div className="mt-4">
+        <SoundMachine />
+      </div>
 
       {/* Today Summary */}
       <TodaySummary entries={todayEntries} />
