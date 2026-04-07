@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 
-// NHS-aligned wake windows by age in weeks
 const WAKE_WINDOWS: { maxWeeks: number; minMinutes: number; maxMinutes: number }[] = [
   { maxWeeks: 8, minMinutes: 45, maxMinutes: 75 },
   { maxWeeks: 12, minMinutes: 60, maxMinutes: 90 },
@@ -13,8 +13,7 @@ const WAKE_WINDOWS: { maxWeeks: number; minMinutes: number; maxMinutes: number }
 ];
 
 function getAgeWeeks(dob: string) {
-  const diff = Date.now() - new Date(dob).getTime();
-  return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+  return Math.floor((Date.now() - new Date(dob).getTime()) / (7 * 24 * 60 * 60 * 1000));
 }
 
 function getWakeWindow(dob: string) {
@@ -33,8 +32,7 @@ export const WakeWindowTimer = ({ lastWakeTime, dob }: WakeWindowTimerProps) => 
 
   useEffect(() => {
     const update = () => {
-      const diff = Date.now() - new Date(lastWakeTime).getTime();
-      setElapsedMinutes(diff / 60000);
+      setElapsedMinutes((Date.now() - new Date(lastWakeTime).getTime()) / 60000);
     };
     update();
     const interval = setInterval(update, 30000);
@@ -45,34 +43,40 @@ export const WakeWindowTimer = ({ lastWakeTime, dob }: WakeWindowTimerProps) => 
   const hours = Math.floor(elapsedMinutes / 60);
   const mins = Math.floor(elapsedMinutes % 60);
 
-  // Color: green → amber → red
-  let colorClass = "text-success";
-  let barColor = "bg-success";
-  if (elapsedMinutes > wakeWindow.maxMinutes) {
-    colorClass = "text-destructive";
-    barColor = "bg-destructive";
-  } else if (elapsedMinutes > wakeWindow.minMinutes) {
-    colorClass = "text-warning";
-    barColor = "bg-warning";
-  }
+  const getBarColor = () => {
+    if (elapsedMinutes > wakeWindow.maxMinutes) return "bg-coral";
+    if (elapsedMinutes > wakeWindow.minMinutes) return "bg-warning";
+    return "bg-success";
+  };
+
+  const getTextColor = () => {
+    if (elapsedMinutes > wakeWindow.maxMinutes) return "text-coral";
+    if (elapsedMinutes > wakeWindow.minMinutes) return "text-warning";
+    return "text-success";
+  };
 
   return (
-    <div className="w-full max-w-xs mb-4">
-      <div className="flex justify-between items-baseline mb-1">
-        <span className="text-xs text-muted-foreground">Awake for</span>
-        <span className={`font-mono font-semibold text-sm ${colorClass}`}>
+    <div className="w-full max-w-xs mb-4 card-dreamy p-4 rounded-2xl">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center">
+            <Clock className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-xs font-medium text-muted-foreground">Awake for</span>
+        </div>
+        <span className={`font-mono font-semibold text-sm ${getTextColor()}`}>
           {hours > 0 ? `${hours}h ${mins}m` : `${mins}m`}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
+      <div className="h-3 bg-secondary rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+          className={`h-full rounded-full transition-all duration-500 ${getBarColor()}`}
           style={{ width: `${progress * 100}%` }}
         />
       </div>
-      <div className="flex justify-between mt-1">
-        <span className="text-[10px] text-muted-foreground">{wakeWindow.minMinutes}m</span>
-        <span className="text-[10px] text-muted-foreground">{wakeWindow.maxMinutes}m</span>
+      <div className="flex justify-between mt-1.5">
+        <span className="text-[10px] text-muted-foreground">{wakeWindow.minMinutes}m sweet spot</span>
+        <span className="text-[10px] text-muted-foreground">{wakeWindow.maxMinutes}m max</span>
       </div>
     </div>
   );
