@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, UserPlus, Baby, Download, ExternalLink, Clock, Moon } from "lucide-react";
+import { LogOut, UserPlus, Baby, Download, ExternalLink, Clock, Moon, Bell, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -22,6 +22,9 @@ const Settings = () => {
   const [showInvite, setShowInvite] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [nightStartHour, setNightStartHour] = useState("18");
+  const [handoverMode, setHandoverMode] = useState(false);
+  const [bedtimeReminder, setBedtimeReminder] = useState("");
+  const [napReminder, setNapReminder] = useState("");
 
   const fetchChild = useCallback(async () => {
     if (!user) return;
@@ -37,6 +40,12 @@ const Settings = () => {
     if (saved) setNightStartHour(saved);
     const darkSaved = localStorage.getItem("napnest_dark");
     if (darkSaved === "true") setIsDark(true);
+    const handover = localStorage.getItem("napnest_handover");
+    if (handover === "true") setHandoverMode(true);
+    const bed = localStorage.getItem("napnest_bedtime_reminder");
+    if (bed) setBedtimeReminder(bed);
+    const nap = localStorage.getItem("napnest_nap_reminder");
+    if (nap) setNapReminder(nap);
   }, []);
 
   useEffect(() => {
@@ -56,6 +65,31 @@ const Settings = () => {
     setNightStartHour(value);
     localStorage.setItem("napnest_night_start", value);
     toast({ title: "Night start updated", description: `Sleep from ${value}:00 classified as night.` });
+  };
+
+  const toggleHandover = (checked: boolean) => {
+    setHandoverMode(checked);
+    localStorage.setItem("napnest_handover", String(checked));
+    toast({ title: checked ? "Handover mode on" : "Handover mode off" });
+  };
+
+  const saveReminder = (type: "bedtime" | "nap", time: string) => {
+    if (type === "bedtime") {
+      setBedtimeReminder(time);
+      localStorage.setItem("napnest_bedtime_reminder", time);
+    } else {
+      setNapReminder(time);
+      localStorage.setItem("napnest_nap_reminder", time);
+    }
+    if (time && "Notification" in window) {
+      Notification.requestPermission().then(perm => {
+        if (perm === "granted") {
+          toast({ title: `${type === "bedtime" ? "Bedtime" : "Nap"} reminder set`, description: `Daily at ${time}` });
+        } else {
+          toast({ title: "Notifications blocked", description: "Please enable notifications in your browser settings.", variant: "destructive" });
+        }
+      });
+    }
   };
 
   const handleInvite = async () => {
@@ -92,7 +126,12 @@ const Settings = () => {
       <h1 className="text-xl font-heading font-bold">Settings ⚙️</h1>
 
       <Card className="card-dreamy border-0">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading flex items-center gap-2"><Baby className="w-4 h-4 text-primary" /> Child Profile</CardTitle></CardHeader>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-heading flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><Baby className="w-4 h-4 text-primary" /></div>
+            Child Profile
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2"><Label>Name</Label><Input value={childName} onChange={(e) => setChildName(e.target.value)} className="rounded-xl" /></div>
           <div className="space-y-2"><Label>Date of Birth</Label><Input type="date" value={childDob} onChange={(e) => setChildDob(e.target.value)} className="rounded-xl" /></div>
@@ -101,7 +140,12 @@ const Settings = () => {
       </Card>
 
       <Card className="card-dreamy border-0">
-        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Night Start Time</CardTitle></CardHeader>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-heading flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><Clock className="w-4 h-4 text-primary" /></div>
+            Night Start Time
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-xs text-muted-foreground">Sleep after this time = "night".</p>
           <Select value={nightStartHour} onValueChange={saveNightStart}>
@@ -115,13 +159,58 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Reminders */}
+      <Card className="card-dreamy border-0">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-heading flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center"><Bell className="w-4 h-4 text-warning" /></div>
+            Reminders
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Bedtime reminder</Label>
+            <Input
+              type="time"
+              value={bedtimeReminder}
+              onChange={(e) => saveReminder("bedtime", e.target.value)}
+              className="rounded-xl w-32 text-xs"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Nap reminder</Label>
+            <Input
+              type="time"
+              value={napReminder}
+              onChange={(e) => saveReminder("nap", e.target.value)}
+              className="rounded-xl w-32 text-xs"
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground">Browser notifications — keep the tab open for reminders.</p>
+        </CardContent>
+      </Card>
+
       <Card className="card-dreamy border-0">
         <CardContent className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Moon className="w-4 h-4 text-primary" />
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><Moon className="w-4 h-4 text-primary" /></div>
             <span className="text-sm font-medium">Dark Mode</span>
           </div>
           <Switch checked={isDark} onCheckedChange={setIsDark} />
+        </CardContent>
+      </Card>
+
+      {/* Handover Mode */}
+      <Card className="card-dreamy border-0">
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-nap/10 flex items-center justify-center"><Users className="w-4 h-4 text-nap" /></div>
+            <div>
+              <span className="text-sm font-medium">Handover Mode</span>
+              <p className="text-[10px] text-muted-foreground">Show "Partner tracking" banner</p>
+            </div>
+          </div>
+          <Switch checked={handoverMode} onCheckedChange={toggleHandover} />
         </CardContent>
       </Card>
 

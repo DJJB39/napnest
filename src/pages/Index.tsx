@@ -8,8 +8,9 @@ import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { SoundMachine } from "@/components/sleep/SoundMachine";
 import { useToast } from "@/hooks/use-toast";
-import { SleepingBabyNest, SleepingCloud } from "@/components/decorative/MoonStars";
+import { SleepingBabyNest, SleepingCloud, TinyMoonPhases } from "@/components/decorative/MoonStars";
 import { motion } from "framer-motion";
+import { Clock } from "lucide-react";
 
 export interface Child {
   id: string;
@@ -25,6 +26,29 @@ export interface SleepEntry {
   sleep_type: string;
   is_deleted: boolean;
 }
+
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 6) return "Good night";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+};
+
+const getAgeWeeks = (dob: string) => {
+  return Math.floor((Date.now() - new Date(dob).getTime()) / (7 * 24 * 60 * 60 * 1000));
+};
+
+const getWakeWindowMinutes = (ageWeeks: number): { min: number; max: number } => {
+  if (ageWeeks < 4) return { min: 35, max: 60 };
+  if (ageWeeks < 8) return { min: 60, max: 90 };
+  if (ageWeeks < 12) return { min: 75, max: 120 };
+  if (ageWeeks < 20) return { min: 90, max: 150 };
+  if (ageWeeks < 36) return { min: 120, max: 210 };
+  if (ageWeeks < 52) return { min: 150, max: 240 };
+  if (ageWeeks < 78) return { min: 180, max: 300 };
+  return { min: 240, max: 360 };
+};
 
 const Index = () => {
   const { user } = useAuth();
@@ -110,26 +134,55 @@ const Index = () => {
   const completedEntries = todayEntries.filter((e) => e.sleep_end);
   const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
 
+  // AI Wake Window Predictor
+  const ageWeeks = getAgeWeeks(child.date_of_birth);
+  const wakeWindow = getWakeWindowMinutes(ageWeeks);
+  let napPrediction: { minutes: number; color: string; label: string } | null = null;
+  if (lastWakeTime && !activeSleep) {
+    const awakeMinutes = Math.floor((Date.now() - new Date(lastWakeTime).getTime()) / 60000);
+    const avgWakeWindow = Math.round((wakeWindow.min + wakeWindow.max) / 2);
+    const minsUntilNap = Math.max(0, avgWakeWindow - awakeMinutes);
+    const color = minsUntilNap > 30 ? "text-success" : minsUntilNap > 15 ? "text-warning" : "text-coral";
+    const bgColor = minsUntilNap > 30 ? "bg-success/10" : minsUntilNap > 15 ? "bg-warning/10" : "bg-coral/10";
+    napPrediction = { minutes: minsUntilNap, color, label: bgColor };
+  }
+
   return (
     <div className="flex flex-col items-center px-4 pt-8 pb-4 relative grain-overlay">
       {/* Floating decorative illustrations */}
       <SleepingCloud className="absolute top-2 right-2 w-20 h-14 opacity-15 pointer-events-none" />
-      <SleepingBabyNest className="absolute -top-2 -right-4 w-28 h-24 opacity-10 pointer-events-none" />
+      <SleepingBabyNest className="absolute -top-2 -right-4 w-32 h-28 opacity-[0.08] pointer-events-none" />
 
-      {/* Header */}
+      {/* Header with greeting */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6 z-10"
+        className="text-center mb-2 z-10"
       >
-        <p className="text-muted-foreground text-sm">Tracking</p>
+        <p className="text-muted-foreground text-sm">{getGreeting()} 💫</p>
         <h1 className="text-2xl font-display font-bold">{child.name} 🌙</h1>
+        <TinyMoonPhases className="justify-center mt-1" />
       </motion.div>
 
       <div className="z-10 flex flex-col items-center w-full max-w-sm">
         {!activeSleep && lastWakeTime && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
             <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
+          </motion.div>
+        )}
+
+        {/* AI Wake Window Predictor Badge */}
+        {napPrediction && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15 }}
+            className={`${napPrediction.label} rounded-2xl px-4 py-2 flex items-center gap-2 mb-3`}
+          >
+            <Clock className={`w-4 h-4 ${napPrediction.color}`} />
+            <span className={`text-sm font-heading font-semibold ${napPrediction.color}`}>
+              {napPrediction.minutes === 0 ? "Nap time now!" : `Next nap in ~${napPrediction.minutes} mins`}
+            </span>
           </motion.div>
         )}
 

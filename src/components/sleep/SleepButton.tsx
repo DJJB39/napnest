@@ -34,27 +34,47 @@ export const SleepButton = ({ isSleeping, sleepStart, onToggle }: SleepButtonPro
         </div>
       )}
 
-      <motion.button
-        onClick={onToggle}
-        whileTap={{ scale: 0.93 }}
-        className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center transition-all duration-300 btn-hover ${
-          isSleeping
-            ? "bg-gradient-to-br from-night to-nap glow-night"
-            : "bg-gradient-to-br from-primary to-primary/70 glow-primary"
-        }`}
-      >
-        {isSleeping ? (
+      <div className="relative">
+        {/* Outer ring pulse when sleeping */}
+        {isSleeping && (
           <>
-            <Moon className="w-10 h-10 text-white mb-1" />
-            <span className="text-xs font-heading font-semibold text-white/90">Sleeping</span>
-          </>
-        ) : (
-          <>
-            <Sun className="w-10 h-10 text-white mb-1" />
-            <span className="text-xs font-heading font-semibold text-white/90">Awake</span>
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-night/30"
+              style={{ margin: -8 }}
+              animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute inset-0 rounded-full border border-nap/20"
+              style={{ margin: -16 }}
+              animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0, 0.2] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            />
           </>
         )}
-      </motion.button>
+
+        <motion.button
+          onClick={onToggle}
+          whileTap={{ scale: 0.93 }}
+          className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center transition-all duration-300 btn-hover ${
+            isSleeping
+              ? "bg-gradient-to-br from-night to-nap glow-night"
+              : "bg-gradient-to-br from-primary to-primary/70 glow-primary"
+          }`}
+        >
+          {isSleeping ? (
+            <>
+              <Moon className="w-10 h-10 text-white mb-1" />
+              <span className="text-xs font-heading font-semibold text-white/90">Sleeping</span>
+            </>
+          ) : (
+            <>
+              <Sun className="w-10 h-10 text-white mb-1" />
+              <span className="text-xs font-heading font-semibold text-white/90">Awake</span>
+            </>
+          )}
+        </motion.button>
+      </div>
 
       {isSleeping && (
         <motion.div
@@ -62,7 +82,7 @@ export const SleepButton = ({ isSleeping, sleepStart, onToggle }: SleepButtonPro
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 text-center"
         >
-          <p className="text-3xl font-mono font-semibold text-night">{elapsed}</p>
+          <p className="text-3xl font-mono font-semibold text-night animate-pulse-soft">{elapsed}</p>
           <p className="text-xs text-muted-foreground mt-1">Tap to wake</p>
         </motion.div>
       )}

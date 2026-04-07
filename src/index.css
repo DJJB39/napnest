@@ -166,7 +166,7 @@
   }
 
   .gradient-page {
-    background: linear-gradient(170deg, hsl(210 60% 95%) 0%, hsl(330 40% 95%) 40%, hsl(210 50% 96%) 100%);
+    background: linear-gradient(170deg, hsl(210 55% 95%) 0%, hsl(330 45% 94%) 40%, hsl(270 30% 96%) 70%, hsl(210 50% 96%) 100%);
   }
 
   .dark .gradient-page {
@@ -174,7 +174,7 @@
   }
 
   .gradient-hero {
-    background: linear-gradient(170deg, hsl(210 60% 94%) 0%, hsl(330 50% 93%) 50%, hsl(270 40% 94%) 100%);
+    background: linear-gradient(170deg, hsl(210 55% 94%) 0%, hsl(330 50% 93%) 40%, hsl(270 35% 94%) 70%, hsl(210 50% 95%) 100%);
   }
 
   .dark .gradient-hero {
@@ -190,7 +190,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.03;
+    opacity: 0.04;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 256px 256px;

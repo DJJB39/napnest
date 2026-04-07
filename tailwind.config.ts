@@ -116,7 +116,7 @@ export default {
         },
         "float-up": {
           "0%": { opacity: "1", transform: "translateY(0)" },
-          "100%": { opacity: "0", transform: "translateY(-24px)" },
+          "100%": { opacity: "0", transform: "translateY(-28px)" },
         },
         twinkle: {
           "0%, 100%": { opacity: "0.3" },
@@ -127,7 +127,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "float-up": "float-up 1.5s ease-out forwards",
+        "float-up": "float-up 2s ease-out forwards",
         twinkle: "twinkle 3s ease-in-out infinite",
       },
     },

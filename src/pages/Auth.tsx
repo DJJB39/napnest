@@ -57,16 +57,28 @@ const Auth = () => {
   };
 
   const features = [
-    { icon: Clock, title: "Sleep Tracking", desc: "One-tap logging with wake window timers", bg: "bg-primary/10", iconColor: "text-primary" },
-    { icon: Sparkles, title: "AI Insights", desc: "NHS-aligned tips powered by AI", bg: "bg-nap/10", iconColor: "text-nap" },
-    { icon: Volume2, title: "Sound Machine", desc: "White & brown noise to soothe your baby", bg: "bg-accent/10", iconColor: "text-accent" },
+    { icon: Clock, title: "Sleep Tracking", desc: "One-tap logging with wake window timers", bg: "bg-[hsl(210_50%_92%)]", iconBg: "bg-[hsl(210_55%_88%)]", iconColor: "text-primary" },
+    { icon: Sparkles, title: "AI Insights", desc: "NHS-aligned tips powered by AI", bg: "bg-[hsl(270_30%_94%)]", iconBg: "bg-[hsl(270_35%_90%)]", iconColor: "text-nap" },
+    { icon: Volume2, title: "Sound Machine", desc: "White & brown noise to soothe your baby", bg: "bg-[hsl(330_35%_94%)]", iconBg: "bg-[hsl(330_40%_90%)]", iconColor: "text-accent" },
   ];
 
   return (
     <div className="min-h-[100dvh] flex flex-col gradient-hero grain-overlay overflow-hidden relative">
+      {/* Subtle star-pattern CSS dots */}
+      <div className="absolute inset-0 pointer-events-none z-0" style={{
+        backgroundImage: `
+          radial-gradient(1.5px 1.5px at 15% 20%, hsl(38 80% 75% / 0.2) 50%, transparent 50%),
+          radial-gradient(1px 1px at 45% 8%, hsl(38 80% 75% / 0.15) 50%, transparent 50%),
+          radial-gradient(2px 2px at 78% 15%, hsl(38 80% 75% / 0.18) 50%, transparent 50%),
+          radial-gradient(1px 1px at 90% 35%, hsl(38 80% 75% / 0.12) 50%, transparent 50%),
+          radial-gradient(1.5px 1.5px at 8% 60%, hsl(38 80% 75% / 0.1) 50%, transparent 50%),
+          radial-gradient(1px 1px at 65% 45%, hsl(38 80% 75% / 0.12) 50%, transparent 50%)
+        `,
+      }} />
+
       {/* Decorative floating clouds */}
-      <SleepingCloud className="absolute top-8 left-4 w-24 h-16 opacity-20" />
-      <SleepingCloud className="absolute top-20 right-8 w-20 h-14 opacity-15" />
+      <SleepingCloud className="absolute top-8 left-4 w-28 h-18 opacity-20" />
+      <SleepingCloud className="absolute top-24 right-6 w-22 h-14 opacity-15" />
 
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
@@ -76,13 +88,13 @@ const Auth = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center text-center max-w-md"
         >
-          {/* Big hero illustration */}
-          <SleepingBabyNest className="w-64 h-56 sm:w-72 sm:h-64 mb-6 drop-shadow-lg" />
+          {/* Big hero illustration — larger on mobile */}
+          <SleepingBabyNest className="w-72 h-64 sm:w-80 sm:h-72 mb-6 drop-shadow-lg" />
 
           <h1 className="text-4xl sm:text-5xl font-display leading-tight text-foreground">
             NapNest: Track Your Baby's Sleep Like Magic
           </h1>
-          <p className="text-muted-foreground mt-4 text-sm sm:text-base font-sans max-w-sm">
+          <p className="text-muted-foreground mt-4 text-sm sm:text-base font-sans max-w-sm leading-relaxed">
             Log naps, get AI tips, soothe with noise — free & simple
           </p>
         </motion.div>
@@ -128,26 +140,26 @@ const Auth = () => {
           </Button>
         </motion.div>
 
-        {/* Feature cards */}
+        {/* Feature cards — pastel tinted */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
           className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg sm:max-w-2xl w-full z-10"
         >
-          {features.map(({ icon: Icon, title, desc, bg, iconColor }, i) => (
+          {features.map(({ icon: Icon, title, desc, bg, iconBg, iconColor }, i) => (
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 + i * 0.1 }}
+              transition={{ delay: 0.9 + i * 0.15 }}
             >
-              <Card className="card-dreamy card-hover text-center border-0 overflow-hidden">
-                <CardContent className="p-5 flex flex-col items-center gap-3">
-                  <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
-                    <Icon className={`w-7 h-7 ${iconColor}`} />
+              <Card className={`${bg} card-hover text-center border-0 overflow-hidden shadow-dreamy`}>
+                <CardContent className="p-6 flex flex-col items-center gap-3">
+                  <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center shadow-sm`}>
+                    <Icon className={`w-8 h-8 ${iconColor}`} />
                   </div>
-                  <h3 className="text-sm font-heading font-semibold">{title}</h3>
+                  <h3 className="text-sm font-heading font-bold">{title}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
                 </CardContent>
               </Card>
