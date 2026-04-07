@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SleepButton } from "@/components/sleep/SleepButton";
 import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
+import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
 import { useToast } from "@/hooks/use-toast";
 import { Moon } from "lucide-react";
 
@@ -33,7 +34,6 @@ const Index = () => {
   const fetchData = useCallback(async () => {
     if (!user) return;
 
-    // Get first child for this user
     const { data: familyMembers } = await supabase
       .from("family_members")
       .select("child_id")
@@ -54,7 +54,6 @@ const Index = () => {
 
     if (childData) setChild(childData);
 
-    // Get today's entries
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
@@ -95,6 +94,7 @@ const Index = () => {
 
   const autoClassifySleepType = () => {
     const hour = new Date().getHours();
+    // TODO: use configurable night start from settings
     return hour >= 18 || hour < 6 ? "night" : "nap";
   };
 
@@ -102,7 +102,6 @@ const Index = () => {
     if (!child) return;
 
     if (activeSleep) {
-      // Stop sleep
       const { error } = await supabase
         .from("sleep_entries")
         .update({ sleep_end: new Date().toISOString() })
@@ -114,7 +113,6 @@ const Index = () => {
         fetchData();
       }
     } else {
-      // Start sleep
       const { data, error } = await supabase
         .from("sleep_entries")
         .insert({
@@ -151,7 +149,6 @@ const Index = () => {
     );
   }
 
-  // Find last wake time for wake window
   const completedEntries = todayEntries.filter((e) => e.sleep_end);
   const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
 
@@ -170,6 +167,11 @@ const Index = () => {
 
       {/* Hero Sleep Button */}
       <SleepButton isSleeping={!!activeSleep} sleepStart={activeSleep?.sleep_start} onToggle={handleToggleSleep} />
+
+      {/* Night Waking Toggle - shown during active night sleep */}
+      {activeSleep && activeSleep.sleep_type === "night" && (
+        <NightWakingToggle sleepEntryId={activeSleep.id} />
+      )}
 
       {/* Today Summary */}
       <TodaySummary entries={todayEntries} />

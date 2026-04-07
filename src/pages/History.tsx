@@ -3,13 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Trash2, Edit2 } from "lucide-react";
+import { Moon, Sun, Trash2, Edit2, Filter, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import type { SleepEntry } from "@/pages/Index";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const History = () => {
   const { user } = useAuth();
@@ -19,28 +20,56 @@ const History = () => {
   const [editEntry, setEditEntry] = useState<SleepEntry | null>(null);
   const [editStart, setEditStart] = useState("");
   const [editEnd, setEditEnd] = useState("");
+  const [editType, setEditType] = useState("nap");
   const [childId, setChildId] = useState<string | null>(null);
+  const [wakingCounts, setWakingCounts] = useState<Record<string, number>>({});
 
   // Quick-add state
   const [showAdd, setShowAdd] = useState(false);
   const [addStart, setAddStart] = useState("");
   const [addEnd, setAddEnd] = useState("");
 
+  // Date range filter
+  const [filterDays, setFilterDays] = useState<number>(7);
+
   const fetchEntries = useCallback(async () => {
     if (!user) return;
     const { data: fam } = await supabase.from("family_members").select("child_id").eq("user_id", user.id).limit(1);
     if (!fam?.length) { setLoading(false); return; }
     setChildId(fam[0].child_id);
+
+    const since = new Date();
+    since.setDate(since.getDate() - filterDays);
+
     const { data } = await supabase
       .from("sleep_entries")
       .select("*")
       .eq("child_id", fam[0].child_id)
       .eq("is_deleted", false)
+      .gte("sleep_start", since.toISOString())
       .order("sleep_start", { ascending: false })
-      .limit(50);
-    setEntries(data || []);
+      .limit(100);
+
+    const entryList = data || [];
+    setEntries(entryList);
+
+    // Fetch night waking counts for all entries
+    if (entryList.length > 0) {
+      const entryIds = entryList.map((e) => e.id);
+      const { data: wakings } = await supabase
+        .from("night_wakings")
+        .select("sleep_entry_id")
+        .in("sleep_entry_id", entryIds);
+      
+      const counts: Record<string, number> = {};
+      (wakings || []).forEach((w) => {
+        counts[w.sleep_entry_id] = (counts[w.sleep_entry_id] || 0) + 1;
+      });
+      setWakingCounts(counts);
+    }
+
     setLoading(false);
-  }, [user]);
+  }, [user, filterDays]);
 
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
 
@@ -55,6 +84,7 @@ const History = () => {
     const { error } = await supabase.from("sleep_entries").update({
       sleep_start: new Date(editStart).toISOString(),
       sleep_end: editEnd ? new Date(editEnd).toISOString() : null,
+      sleep_type: editType,
     }).eq("id", editEntry.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { setEditEntry(null); fetchEntries(); }
@@ -90,9 +120,27 @@ const History = () => {
 
   return (
     <div className="px-4 pt-8 pb-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-heading font-bold">Sleep History</h1>
         <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => setShowAdd(true)}>+ Add Past Sleep</Button>
+      </div>
+
+      {/* Date range filter */}
+      <div className="flex items-center gap-2 mb-4">
+        <Filter className="w-4 h-4 text-muted-foreground" />
+        <div className="flex gap-1">
+          {[7, 14, 30].map((d) => (
+            <Button
+              key={d}
+              size="sm"
+              variant={filterDays === d ? "default" : "ghost"}
+              className="rounded-lg text-xs h-7 px-3"
+              onClick={() => setFilterDays(d)}
+            >
+              {d}d
+            </Button>
+          ))}
+        </div>
       </div>
 
       {entries.length === 0 ? (
@@ -106,7 +154,7 @@ const History = () => {
             <motion.div key={entry.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
               <Card>
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${entry.sleep_type === "night" ? "bg-primary/20" : "bg-warning/20"}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${entry.sleep_type === "night" ? "bg-primary/20" : "bg-warning/20"}`}>
                     {entry.sleep_type === "night" ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-warning" />}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -117,9 +165,15 @@ const History = () => {
                     <p className="text-xs text-muted-foreground">
                       {formatTime(entry.sleep_start)} → {entry.sleep_end ? formatTime(entry.sleep_end) : "now"}
                     </p>
+                    {wakingCounts[entry.id] > 0 && (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-warning mt-0.5">
+                        <AlertCircle className="w-3 h-3" />
+                        {wakingCounts[entry.id]} waking{wakingCounts[entry.id] > 1 ? "s" : ""}
+                      </span>
+                    )}
                   </div>
-                  <span className="font-mono text-sm font-semibold text-primary">{formatDuration(entry.sleep_start, entry.sleep_end)}</span>
-                  <button onClick={() => { setEditEntry(entry); setEditStart(entry.sleep_start.slice(0, 16)); setEditEnd(entry.sleep_end?.slice(0, 16) || ""); }} className="p-2 text-muted-foreground hover:text-foreground"><Edit2 className="w-4 h-4" /></button>
+                  <span className="font-mono text-sm font-semibold text-primary shrink-0">{formatDuration(entry.sleep_start, entry.sleep_end)}</span>
+                  <button onClick={() => { setEditEntry(entry); setEditStart(entry.sleep_start.slice(0, 16)); setEditEnd(entry.sleep_end?.slice(0, 16) || ""); setEditType(entry.sleep_type); }} className="p-2 text-muted-foreground hover:text-foreground"><Edit2 className="w-4 h-4" /></button>
                   <button onClick={() => handleDelete(entry.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                 </CardContent>
               </Card>
@@ -135,6 +189,16 @@ const History = () => {
           <div className="space-y-4">
             <div className="space-y-2"><Label>Start</Label><Input type="datetime-local" value={editStart} onChange={(e) => setEditStart(e.target.value)} /></div>
             <div className="space-y-2"><Label>End</Label><Input type="datetime-local" value={editEnd} onChange={(e) => setEditEnd(e.target.value)} /></div>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select value={editType} onValueChange={setEditType}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nap">Nap</SelectItem>
+                  <SelectItem value="night">Night</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button className="w-full rounded-xl" onClick={handleEdit}>Save Changes</Button>
           </div>
         </DialogContent>

@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, UserPlus, Baby, Download } from "lucide-react";
+import { LogOut, UserPlus, Baby, Download, ExternalLink, Clock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Settings = () => {
   const { user, signOut } = useAuth();
@@ -20,6 +21,7 @@ const Settings = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [showInvite, setShowInvite] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [nightStartHour, setNightStartHour] = useState("18");
 
   const fetchChild = useCallback(async () => {
     if (!user) return;
@@ -32,6 +34,12 @@ const Settings = () => {
   useEffect(() => { fetchChild(); }, [fetchChild]);
 
   useEffect(() => {
+    // Load saved night start from localStorage
+    const saved = localStorage.getItem("dreamlog_night_start");
+    if (saved) setNightStartHour(saved);
+  }, []);
+
+  useEffect(() => {
     if (isDark) document.documentElement.classList.remove("light");
     else document.documentElement.classList.add("light");
   }, [isDark]);
@@ -41,6 +49,12 @@ const Settings = () => {
     const { error } = await supabase.from("children").update({ name: childName, date_of_birth: childDob }).eq("id", child.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Saved!" });
+  };
+
+  const saveNightStart = (value: string) => {
+    setNightStartHour(value);
+    localStorage.setItem("dreamlog_night_start", value);
+    toast({ title: "Night start updated", description: `Sleep starting from ${value}:00 will be classified as night.` });
   };
 
   const handleInvite = async () => {
@@ -100,6 +114,22 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Night Start Time */}
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm font-heading flex items-center gap-2"><Clock className="w-4 h-4" /> Night Start Time</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-xs text-muted-foreground">Sleep logged after this time will be auto-classified as "night".</p>
+          <Select value={nightStartHour} onValueChange={saveNightStart}>
+            <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 7 }, (_, i) => i + 16).map((h) => (
+                <SelectItem key={h} value={String(h)}>{`${h}:00`}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
       {/* Theme */}
       <Card>
         <CardContent className="p-4 flex items-center justify-between">
@@ -123,6 +153,21 @@ const Settings = () => {
           <Button variant="outline" className="w-full rounded-xl" onClick={exportCsv}>
             <Download className="w-4 h-4 mr-2" /> Export Data as CSV
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* NHS Link */}
+      <Card>
+        <CardContent className="p-4">
+          <a
+            href="https://www.nhs.uk/conditions/baby/caring-for-a-newborn/helping-your-baby-to-sleep/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            <ExternalLink className="w-4 h-4" />
+            NHS Baby Sleep Guidance
+          </a>
         </CardContent>
       </Card>
 
