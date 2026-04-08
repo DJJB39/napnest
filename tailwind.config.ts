@@ -15,8 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        heading: ["Poppins", "sans-serif"],
-        display: ["Caveat", "cursive"],
+        heading: ["Inter", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {

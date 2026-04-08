@@ -2,15 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SleepButton } from "@/components/sleep/SleepButton";
-import { WakeWindowTimer } from "@/components/sleep/WakeWindowTimer";
 import { TodaySummary } from "@/components/sleep/TodaySummary";
 import { NightWakingToggle } from "@/components/sleep/NightWakingToggle";
-import { SleepTimer } from "@/components/sleep/SleepTimer";
 import { EditStartTime } from "@/components/sleep/EditStartTime";
-import { SoundMachine } from "@/components/sleep/SoundMachine";
-import { NightGlow } from "@/components/sleep/NightGlow";
 import { useToast } from "@/hooks/use-toast";
-import { SleepingBabyNest, SleepingCloud, TinyMoonPhases } from "@/components/decorative/MoonStars";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 
@@ -37,9 +32,8 @@ const getGreeting = () => {
   return "Good evening";
 };
 
-const getAgeWeeks = (dob: string) => {
-  return Math.floor((Date.now() - new Date(dob).getTime()) / (7 * 24 * 60 * 60 * 1000));
-};
+const getAgeWeeks = (dob: string) =>
+  Math.floor((Date.now() - new Date(dob).getTime()) / (7 * 24 * 60 * 60 * 1000));
 
 const getWakeWindowMinutes = (ageWeeks: number): { min: number; max: number } => {
   if (ageWeeks < 4) return { min: 35, max: 60 };
@@ -126,8 +120,8 @@ const Index = () => {
   if (!child) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80dvh] p-6 text-center">
-        <SleepingBabyNest className="w-48 h-40 mb-6 opacity-60" />
-        <h2 className="text-xl font-display font-bold mb-2">No child profile yet</h2>
+        <div className="text-5xl mb-4">🌙</div>
+        <h2 className="text-xl font-heading font-bold mb-2">No child profile yet</h2>
         <p className="text-muted-foreground text-sm">Please complete onboarding to get started.</p>
       </div>
     );
@@ -136,50 +130,56 @@ const Index = () => {
   const completedEntries = todayEntries.filter((e) => e.sleep_end);
   const lastWakeTime = completedEntries.length > 0 ? completedEntries[0].sleep_end : null;
 
-  // AI Wake Window Predictor
   const ageWeeks = getAgeWeeks(child.date_of_birth);
   const wakeWindow = getWakeWindowMinutes(ageWeeks);
-  let napPrediction: { minutes: number; color: string; label: string } | null = null;
+
+  // Inline wake window info
+  let awakeMinutes = 0;
   if (lastWakeTime && !activeSleep) {
-    const awakeMinutes = Math.floor((Date.now() - new Date(lastWakeTime).getTime()) / 60000);
+    awakeMinutes = Math.floor((Date.now() - new Date(lastWakeTime).getTime()) / 60000);
+  }
+
+  // Nap prediction
+  let napPrediction: { minutes: number; color: string; bgColor: string } | null = null;
+  if (lastWakeTime && !activeSleep) {
     const avgWakeWindow = Math.round((wakeWindow.min + wakeWindow.max) / 2);
     const minsUntilNap = Math.max(0, avgWakeWindow - awakeMinutes);
     const color = minsUntilNap > 30 ? "text-success" : minsUntilNap > 15 ? "text-warning" : "text-coral";
     const bgColor = minsUntilNap > 30 ? "bg-success/10" : minsUntilNap > 15 ? "bg-warning/10" : "bg-coral/10";
-    napPrediction = { minutes: minsUntilNap, color, label: bgColor };
+    napPrediction = { minutes: minsUntilNap, color, bgColor };
   }
 
   return (
-    <div className="flex flex-col items-center px-4 pt-8 pb-4 relative grain-overlay">
-      {/* Floating decorative illustrations */}
-      <SleepingCloud className="absolute top-2 right-2 w-20 h-14 opacity-15 pointer-events-none" />
-      <SleepingBabyNest className="absolute -top-2 -right-4 w-32 h-28 opacity-[0.08] pointer-events-none" />
-
-      {/* Header with greeting */}
+    <div className="flex flex-col items-center px-4 pt-6 pb-4">
+      {/* Zone 1 — Compact header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-2 z-10"
+        className="text-center mb-1"
       >
         <p className="text-muted-foreground text-sm">{getGreeting()} 💫</p>
-        <h1 className="text-2xl font-display font-bold">{child.name} 🌙</h1>
-        <TinyMoonPhases className="justify-center mt-1" />
+        <h1 className="text-2xl font-heading font-bold">{child.name}</h1>
       </motion.div>
 
-      <div className="z-10 flex flex-col items-center w-full max-w-sm">
-        {!activeSleep && lastWakeTime && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-            <WakeWindowTimer lastWakeTime={lastWakeTime} dob={child.date_of_birth} />
-          </motion.div>
-        )}
+      {/* Inline wake window status */}
+      {!activeSleep && lastWakeTime && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={`text-xs mb-3 ${awakeMinutes > wakeWindow.max ? "text-coral" : awakeMinutes > wakeWindow.min ? "text-warning" : "text-success"}`}
+        >
+          Awake {awakeMinutes}m · window {wakeWindow.min}–{wakeWindow.max}m
+        </motion.p>
+      )}
 
-        {/* AI Wake Window Predictor Badge */}
+      {/* Zone 2 — Hero sleep button */}
+      <div className="flex flex-col items-center w-full max-w-sm">
         {napPrediction && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15 }}
-            className={`${napPrediction.label} rounded-2xl px-4 py-2 flex items-center gap-2 mb-3`}
+            transition={{ delay: 0.1 }}
+            className={`${napPrediction.bgColor} rounded-2xl px-4 py-2 flex items-center gap-2 mb-3`}
           >
             <Clock className={`w-4 h-4 ${napPrediction.color}`} />
             <span className={`text-sm font-heading font-semibold ${napPrediction.color}`}>
@@ -198,45 +198,16 @@ const Index = () => {
           />
         )}
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 }}
-          className="mt-3"
-        >
-          <NightGlow />
-        </motion.div>
-
         {activeSleep && activeSleep.sleep_type === "night" && (
           <NightWakingToggle sleepEntryId={activeSleep.id} />
         )}
 
-        {/* Sleep Timer section */}
+        {/* Zone 3 — Below the fold */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-6 w-full flex flex-col items-center"
-        >
-          <SleepTimer />
-        </motion.div>
-
-        {/* Sound Machine section */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 w-full flex flex-col items-center"
-        >
-          <h2 className="text-lg font-display font-bold text-center mb-3 text-foreground">💤 Sound Machine</h2>
-          <SoundMachine />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="w-full"
+          className="w-full mt-6"
         >
           <TodaySummary entries={todayEntries} />
         </motion.div>
