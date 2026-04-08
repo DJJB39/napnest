@@ -1,28 +1,45 @@
 
 
-# Fix Install Banner for iOS
+# Add Apple Touch Icons from Uploaded Image
 
-## Problem
+## Approach
 
-The install banner **only works on Android/Chrome**. It relies on the `beforeinstallprompt` browser event, which iOS Safari **never fires**. Since you're on iOS, the banner will never appear.
+Copy the uploaded baby illustration to the project, then use a Python script with Pillow to resize it into four Apple Touch Icon sizes. Update `index.html` with the full set of `<link>` tags.
 
-## Solution
+Note: iOS automatically applies rounded corners to home screen icons — the PNGs should be square (no corner rounding baked in).
 
-Detect iOS Safari users and show a tailored banner with instructions to use the native Share → "Add to Home Screen" flow. Keep the existing Android/Chrome logic for those users.
+## Steps
 
-## Changes
+### 1. Copy uploaded image into project
+Copy `user-uploads://IMG_9256.jpeg` to `/tmp/` as a working source.
 
-### Edit `src/components/InstallBanner.tsx`
+### 2. Generate 4 icon sizes via Python/Pillow
+Crop the image to focus on the baby+cloud illustration (remove or minimize the "NapNest" text at the bottom), then resize to:
+- 180×180 → `public/apple-touch-icon.png`
+- 167×167 → `public/apple-touch-icon-167x167.png`
+- 152×152 → `public/apple-touch-icon-152x152.png`
+- 120×120 → `public/apple-touch-icon-120x120.png`
 
-- Add iOS detection: check for `navigator.standalone` (undefined = not installed yet) and iOS user agent
-- If iOS + not already in standalone mode → show banner with iOS-specific message: "Tap the Share button ↗ then 'Add to Home Screen'" instead of an Install button
-- If Android/Chrome → keep existing `beforeinstallprompt` flow with the Install button
-- Both paths respect the same 30-day dismiss, iframe guard, and mobile-only checks
-- Also check `display-mode: standalone` media query to hide the banner if already installed
+Also regenerate `public/icon-192.png` and `public/icon-512.png` from the same source for manifest consistency.
 
-### Files
+### 3. Update `index.html`
+Replace the single `apple-touch-icon` line (line 14) with the full set:
+```html
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+```
+
+## Files
 
 | File | Action |
 |------|--------|
-| `src/components/InstallBanner.tsx` | Edit — add iOS Safari detection and instruction banner |
+| `public/apple-touch-icon.png` | Create — 180×180 |
+| `public/apple-touch-icon-152x152.png` | Create — 152×152 |
+| `public/apple-touch-icon-167x167.png` | Create — 167×167 |
+| `public/apple-touch-icon-120x120.png` | Create — 120×120 |
+| `public/icon-192.png` | Regenerate — 192×192 from same source |
+| `public/icon-512.png` | Regenerate — 512×512 from same source |
+| `index.html` | Edit — replace line 14 with 4 apple-touch-icon links |
 
