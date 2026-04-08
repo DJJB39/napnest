@@ -57,14 +57,13 @@ const Auth = () => {
   };
 
   const features = [
-    { icon: Clock, title: "Sleep Tracking", desc: "One-tap logging with wake window timers", bg: "bg-[hsl(210_50%_92%)]", iconBg: "bg-[hsl(210_55%_88%)]", iconColor: "text-primary" },
-    { icon: Sparkles, title: "AI Insights", desc: "NHS-aligned tips powered by AI", bg: "bg-[hsl(270_30%_94%)]", iconBg: "bg-[hsl(270_35%_90%)]", iconColor: "text-nap" },
-    { icon: Volume2, title: "Sound Machine", desc: "White & brown noise to soothe your baby", bg: "bg-[hsl(330_35%_94%)]", iconBg: "bg-[hsl(330_40%_90%)]", iconColor: "text-accent" },
+    { icon: Clock, emoji: "😴", title: "One-Tap Tracking", desc: "Because 3am you can't handle buttons", gradient: "from-teal-400 to-cyan-500", glow: "hover:ring-teal-400/30" },
+    { icon: Sparkles, emoji: "🧠", title: "AI Sleep Coach", desc: "Smarter than your mum's advice (sorry mum)", gradient: "from-violet-400 to-purple-500", glow: "hover:ring-violet-400/30" },
+    { icon: Volume2, emoji: "🌊", title: "Sound Machine", desc: "Shhhh machine goes brrr", gradient: "from-pink-400 to-rose-500", glow: "hover:ring-pink-400/30" },
   ];
 
   return (
     <div className="min-h-[100dvh] flex flex-col gradient-hero grain-overlay overflow-hidden relative">
-      {/* Subtle star-pattern CSS dots */}
       <div className="absolute inset-0 pointer-events-none z-0" style={{
         backgroundImage: `
           radial-gradient(1.5px 1.5px at 15% 20%, hsl(38 80% 75% / 0.2) 50%, transparent 50%),
@@ -76,11 +75,9 @@ const Auth = () => {
         `,
       }} />
 
-      {/* Decorative floating clouds */}
       <SleepingCloud className="absolute top-8 left-4 w-28 h-18 opacity-20" />
       <SleepingCloud className="absolute top-24 right-6 w-22 h-14 opacity-15" />
 
-      {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -88,7 +85,6 @@ const Auth = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center text-center max-w-md"
         >
-          {/* Big hero illustration — larger on mobile */}
           <SleepingBabyNest className="w-72 h-64 sm:w-80 sm:h-72 mb-6 drop-shadow-lg" />
 
           <h1 className="text-4xl sm:text-5xl font-heading font-bold leading-tight text-foreground">
@@ -99,7 +95,6 @@ const Auth = () => {
           </p>
         </motion.div>
 
-        {/* CTA buttons */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,29 +135,27 @@ const Auth = () => {
           </Button>
         </motion.div>
 
-        {/* Feature cards — pastel tinted */}
+        {/* Feature cards — glassmorphic */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg sm:max-w-2xl w-full z-10"
+          className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-lg sm:max-w-2xl w-full z-10"
         >
-          {features.map(({ icon: Icon, title, desc, bg, iconBg, iconColor }, i) => (
+          {features.map(({ icon: Icon, emoji, title, desc, gradient, glow }, i) => (
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 + i * 0.15 }}
+              className={`group rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-6 flex flex-col items-center gap-3 text-center transition-all duration-300 hover:scale-[1.03] hover:ring-2 ${glow} cursor-default`}
             >
-              <Card className={`${bg} card-hover text-center border-0 overflow-hidden shadow-dreamy`}>
-                <CardContent className="p-6 flex flex-col items-center gap-3">
-                  <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center shadow-sm`}>
-                    <Icon className={`w-8 h-8 ${iconColor}`} />
-                  </div>
-                  <h3 className="text-sm font-heading font-bold">{title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
-                </CardContent>
-              </Card>
+              <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+                <Icon className="w-7 h-7 text-white" />
+              </div>
+              <span className="text-2xl">{emoji}</span>
+              <h3 className="text-sm font-heading font-bold text-foreground">{title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
             </motion.div>
           ))}
         </motion.div>
