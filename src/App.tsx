@@ -21,6 +21,7 @@ const Demo = lazy(() => import("./pages/Demo"));
 const AskAI = lazy(() => import("./pages/AskAI"));
 const WhatToExpect = lazy(() => import("./pages/WhatToExpect"));
 const BedtimeBook = lazy(() => import("./pages/BedtimeBook"));
+const More = lazy(() => import("./pages/More"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -74,6 +75,7 @@ const App = () => (
                 <Route path="/stories" element={<BedtimeBook />} />
                 <Route path="/ask-ai" element={<AskAI />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/more" element={<More />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
