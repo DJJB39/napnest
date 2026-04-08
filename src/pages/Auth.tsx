@@ -91,7 +91,7 @@ const Auth = () => {
           {/* Big hero illustration — larger on mobile */}
           <SleepingBabyNest className="w-72 h-64 sm:w-80 sm:h-72 mb-6 drop-shadow-lg" />
 
-          <h1 className="text-4xl sm:text-5xl font-display leading-tight text-foreground">
+          <h1 className="text-4xl sm:text-5xl font-heading font-bold leading-tight text-foreground">
             NapNest: Track Your Baby's Sleep Like Magic
           </h1>
           <p className="text-muted-foreground mt-4 text-sm sm:text-base font-sans max-w-sm leading-relaxed">

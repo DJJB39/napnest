@@ -182,7 +182,7 @@ const WhatToExpect = () => {
         }}
       >
         <Baby className="w-10 h-10 mx-auto mb-2 text-primary" />
-        <h1 className="text-xl font-display font-bold">At {ageDisplay}, here&apos;s what to expect</h1>
+        <h1 className="text-xl font-heading font-bold">At {ageDisplay}, here&apos;s what to expect</h1>
         <p className="text-muted-foreground text-sm mt-1">Straight from NHS UK! 🏥</p>
       </motion.div>
 
