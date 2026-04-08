@@ -12,9 +12,9 @@ export const MoonStars = ({ className = "" }: { className?: string }) => (
 
 export const FloatingZzz = () => (
   <div className="relative w-12 h-12">
-    <span className="absolute text-primary font-display font-bold text-sm animate-float-up" style={{ left: 4, top: 0, animationDelay: "0s", animationIterationCount: "infinite" }}>Z</span>
-    <span className="absolute text-primary/70 font-display font-bold text-base animate-float-up" style={{ left: 14, top: 6, animationDelay: "0.5s", animationIterationCount: "infinite" }}>z</span>
-    <span className="absolute text-primary/40 font-display font-bold text-lg animate-float-up" style={{ left: 24, top: 2, animationDelay: "1s", animationIterationCount: "infinite" }}>Z</span>
+    <span className="absolute text-primary font-heading font-bold text-sm animate-float-up" style={{ left: 4, top: 0, animationDelay: "0s", animationIterationCount: "infinite" }}>Z</span>
+    <span className="absolute text-primary/70 font-heading font-bold text-base animate-float-up" style={{ left: 14, top: 6, animationDelay: "0.5s", animationIterationCount: "infinite" }}>z</span>
+    <span className="absolute text-primary/40 font-heading font-bold text-lg animate-float-up" style={{ left: 24, top: 2, animationDelay: "1s", animationIterationCount: "infinite" }}>Z</span>
   </div>
 );
 

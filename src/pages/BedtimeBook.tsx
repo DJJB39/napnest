@@ -210,7 +210,7 @@ const BedtimeBook = () => {
           />
         )}
 
-        <h2 className="text-lg font-display font-bold text-center mb-4">{activeChapter.title}</h2>
+        <h2 className="text-lg font-heading font-bold text-center mb-4">{activeChapter.title}</h2>
         <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line text-center max-w-sm mx-auto">
           {activeChapter.story_text}
         </p>
@@ -237,7 +237,7 @@ const BedtimeBook = () => {
         }}
       >
         <BookOpen className="w-10 h-10 mx-auto mb-2 text-primary" />
-        <h1 className="text-xl font-display font-bold">The Materia Saga</h1>
+        <h1 className="text-xl font-heading font-bold">The Materia Saga</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {childName}&apos;s bedtime adventure — 24 chapters, Months 0–23 ✨
         </p>

@@ -155,7 +155,7 @@ export default function AskAI() {
       {/* Header */}
       <div className="text-center mb-3 flex-shrink-0">
         <BabyWithBib />
-        <h1 className="font-display text-2xl text-foreground">Ask about your baby</h1>
+        <h1 className="font-heading font-bold text-2xl text-foreground">Ask about your baby</h1>
         <p className="text-xs text-muted-foreground mt-1">NHS-guided answers about sleep, development & health</p>
       </div>
 

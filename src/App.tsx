@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -60,26 +61,28 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/invite" element={<Invite />} />
-              <Route path="/demo" element={<Demo />} />
-              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-              <Route element={<ProtectedRoute><OnboardingGate><AppLayout /></OnboardingGate></ProtectedRoute>}>
-                <Route path="/" element={<Index />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/expect" element={<WhatToExpect />} />
-                <Route path="/stories" element={<BedtimeBook />} />
-                <Route path="/ask-ai" element={<AskAI />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/more" element={<More />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/invite" element={<Invite />} />
+                <Route path="/demo" element={<Demo />} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                <Route element={<ProtectedRoute><OnboardingGate><AppLayout /></OnboardingGate></ProtectedRoute>}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/expect" element={<WhatToExpect />} />
+                  <Route path="/stories" element={<BedtimeBook />} />
+                  <Route path="/ask-ai" element={<AskAI />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/more" element={<More />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

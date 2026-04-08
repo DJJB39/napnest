@@ -77,7 +77,7 @@ export const SleepTimer = () => {
       </div>
 
       {remaining === 0 && (
-        <p className="text-sm text-success font-display font-bold">Timer complete! 🎉</p>
+        <p className="text-sm text-success font-heading font-bold">Timer complete! 🎉</p>
       )}
     </div>
   );

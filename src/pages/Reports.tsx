@@ -8,7 +8,6 @@ import { Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WeeklySummary } from "@/components/reports/WeeklySummary";
 import { SleepTimeline } from "@/components/reports/SleepTimeline";
-import { TinyMoonPhases } from "@/components/decorative/MoonStars";
 
 interface DayData { day: string; nap: number; night: number; total: number; }
 
@@ -18,6 +17,14 @@ const getNhsRange = (ageMonths: number): { min: number; max: number } => {
   if (ageMonths < 12) return { min: 12, max: 16 };
   if (ageMonths < 24) return { min: 11, max: 14 };
   return { min: 10, max: 13 };
+};
+
+const tooltipStyle = {
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: "12px",
+  boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)",
+  color: "hsl(var(--foreground))",
 };
 
 const Reports = () => {
@@ -34,17 +41,30 @@ const Reports = () => {
   const [nhsRange, setNhsRange] = useState({ min: 12, max: 16 });
   const [viewDays, setViewDays] = useState(7);
 
-  const fetchDayData = async (cId: string, daysAgo: number, count: number): Promise<DayData[]> => {
-    const days: DayData[] = [];
-    for (let i = daysAgo + count - 1; i >= daysAgo; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
-      const next = new Date(d); next.setDate(next.getDate() + 1);
-      const { data: entries } = await supabase.from("sleep_entries").select("*").eq("child_id", cId).eq("is_deleted", false).gte("sleep_start", d.toISOString()).lt("sleep_start", next.toISOString()).not("sleep_end", "is", null);
-      const napMs = (entries || []).filter(e => e.sleep_type === "nap").reduce((s, e) => s + (new Date(e.sleep_end!).getTime() - new Date(e.sleep_start).getTime()), 0);
-      const nightMs = (entries || []).filter(e => e.sleep_type === "night").reduce((s, e) => s + (new Date(e.sleep_end!).getTime() - new Date(e.sleep_start).getTime()), 0);
-      days.push({ day: d.toLocaleDateString([], { weekday: "short" }), nap: +(napMs / 3600000).toFixed(1), night: +(nightMs / 3600000).toFixed(1), total: +((napMs + nightMs) / 3600000).toFixed(1) });
+  const aggregateByDay = (entries: any[], startDate: Date, days: number): DayData[] => {
+    const result: DayData[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const next = new Date(d);
+      next.setDate(next.getDate() + 1);
+
+      const dayEntries = entries.filter(e => {
+        const start = new Date(e.sleep_start);
+        return start >= d && start < next;
+      });
+
+      const napMs = dayEntries.filter(e => e.sleep_type === "nap").reduce((s, e) => s + (new Date(e.sleep_end).getTime() - new Date(e.sleep_start).getTime()), 0);
+      const nightMs = dayEntries.filter(e => e.sleep_type === "night").reduce((s, e) => s + (new Date(e.sleep_end).getTime() - new Date(e.sleep_start).getTime()), 0);
+      result.push({
+        day: d.toLocaleDateString([], { weekday: "short" }),
+        nap: +(napMs / 3600000).toFixed(1),
+        night: +(nightMs / 3600000).toFixed(1),
+        total: +((napMs + nightMs) / 3600000).toFixed(1),
+      });
     }
-    return days;
+    return result;
   };
 
   const fetchData = useCallback(async () => {
@@ -52,16 +72,41 @@ const Reports = () => {
     const { data: fam } = await supabase.from("family_members").select("child_id").eq("user_id", user.id).limit(1);
     if (!fam?.length) { setLoading(false); return; }
     setChildId(fam[0].child_id);
+
     const { data: child } = await supabase.from("children").select("date_of_birth").eq("id", fam[0].child_id).single();
     if (child) {
       const ageMonths = Math.floor((Date.now() - new Date(child.date_of_birth).getTime()) / (30.44 * 24 * 60 * 60 * 1000));
       setNhsRange(getNhsRange(ageMonths));
     }
-    const [thisWeek, lastWeek] = await Promise.all([fetchDayData(fam[0].child_id, 0, viewDays), fetchDayData(fam[0].child_id, viewDays, viewDays)]);
-    setThisWeekData(thisWeek); setLastWeekData(lastWeek);
-    const since = new Date(); since.setDate(since.getDate() - viewDays);
-    const { data: entries } = await supabase.from("sleep_entries").select("sleep_start, sleep_end, sleep_type").eq("child_id", fam[0].child_id).eq("is_deleted", false).gte("sleep_start", since.toISOString()).order("sleep_start");
-    setAllEntries(entries || []);
+
+    // Single query for both periods
+    const since = new Date();
+    since.setDate(since.getDate() - (viewDays * 2));
+    const { data: entries } = await supabase
+      .from("sleep_entries")
+      .select("sleep_start, sleep_end, sleep_type")
+      .eq("child_id", fam[0].child_id)
+      .eq("is_deleted", false)
+      .not("sleep_end", "is", null)
+      .gte("sleep_start", since.toISOString())
+      .order("sleep_start");
+
+    const allFetched = entries || [];
+    const today = new Date();
+    const periodStart = new Date(today);
+    periodStart.setDate(periodStart.getDate() - viewDays);
+
+    const thisEntries = allFetched.filter(e => new Date(e.sleep_start) >= periodStart);
+    const lastEntries = allFetched.filter(e => new Date(e.sleep_start) < periodStart);
+
+    setThisWeekData(aggregateByDay(thisEntries, today, viewDays));
+    setLastWeekData(aggregateByDay(lastEntries, periodStart, viewDays));
+
+    // Timeline entries (this period only)
+    const timelineSince = new Date();
+    timelineSince.setDate(timelineSince.getDate() - viewDays);
+    setAllEntries(thisEntries);
+
     const { data: reviews } = await supabase.from("ai_reviews").select("*").eq("child_id", fam[0].child_id).order("created_at", { ascending: false }).limit(5);
     setPastReviews(reviews || []);
     setLoading(false);
@@ -83,14 +128,10 @@ const Reports = () => {
 
   const nhsChartData = thisWeekData.map((d) => ({ ...d, nhsMin: nhsRange.min, nhsMax: nhsRange.max }));
 
-  // Dynamic AI review button label
   const daysWithData = thisWeekData.filter(d => d.total > 0).length;
   const dailyAvg = daysWithData > 0 ? (thisWeekData.reduce((s, d) => s + d.total, 0) / daysWithData) : 0;
-  const aiButtonLabel = dailyAvg > 0
-    ? `Avg ${dailyAvg.toFixed(1)}h — Get personalized tips`
-    : "Get AI Review";
+  const aiButtonLabel = dailyAvg > 0 ? `Avg ${dailyAvg.toFixed(1)}h — Get personalized tips` : "Get AI Review";
 
-  // Sleep vs NHS bar data
   const sleepVsNhs = dailyAvg > 0 ? {
     avg: dailyAvg,
     inRange: dailyAvg >= nhsRange.min && dailyAvg <= nhsRange.max,
@@ -106,10 +147,7 @@ const Reports = () => {
   return (
     <div className="px-4 pt-8 pb-4 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
-          <TinyMoonPhases className="mt-1" />
-        </div>
+        <h1 className="text-xl font-heading font-bold">Sleep Reports 📊</h1>
         <div className="flex gap-1">
           {[7, 14, 30].map((d) => (
             <Button key={d} size="sm" variant={viewDays === d ? "default" : "ghost"} className="rounded-2xl text-xs h-7 px-3 btn-hover" onClick={() => setViewDays(d)}>{d}d</Button>
@@ -119,22 +157,13 @@ const Reports = () => {
 
       <WeeklySummary thisWeek={thisWeekData} lastWeek={lastWeekData} />
 
-      {/* Sleep vs NHS visual bar */}
       {sleepVsNhs && (
         <Card className="card-dreamy border-0">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-heading">Sleep vs NHS Range</CardTitle></CardHeader>
           <CardContent className="pb-5">
             <div className="relative h-8 bg-secondary rounded-full overflow-hidden">
-              {/* NHS green band */}
-              <div
-                className="absolute top-0 bottom-0 bg-success/20 border-l border-r border-success/40"
-                style={{ left: `${sleepVsNhs.nhsMinPct}%`, width: `${sleepVsNhs.nhsMaxPct - sleepVsNhs.nhsMinPct}%` }}
-              />
-              {/* Avg marker */}
-              <div
-                className={`absolute top-0 bottom-0 w-1.5 rounded-full ${sleepVsNhs.inRange ? "bg-success" : sleepVsNhs.below ? "bg-coral" : "bg-warning"}`}
-                style={{ left: `${sleepVsNhs.pct}%` }}
-              />
+              <div className="absolute top-0 bottom-0 bg-success/20 border-l border-r border-success/40" style={{ left: `${sleepVsNhs.nhsMinPct}%`, width: `${sleepVsNhs.nhsMaxPct - sleepVsNhs.nhsMinPct}%` }} />
+              <div className={`absolute top-0 bottom-0 w-1.5 rounded-full ${sleepVsNhs.inRange ? "bg-success" : sleepVsNhs.below ? "bg-coral" : "bg-warning"}`} style={{ left: `${sleepVsNhs.pct}%` }} />
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
               <span>0h</span>
@@ -154,9 +183,9 @@ const Reports = () => {
         <CardContent className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeekData}>
-              <XAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
-              <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
+              <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
+              <Tooltip contentStyle={tooltipStyle} />
               <ReferenceLine y={nhsRange.max} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" />
               <ReferenceLine y={nhsRange.min} stroke="hsl(160 60% 45%)" strokeDasharray="4 4" label={{ value: "NHS", fill: "hsl(160 60% 45%)", fontSize: 10, position: "right" }} />
               <Bar dataKey="night" stackId="a" fill="hsl(239 84% 67%)" radius={[0, 0, 0, 0]} />
@@ -171,11 +200,11 @@ const Reports = () => {
         <CardContent className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={nhsChartData}>
-              <XAxis dataKey="day" tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "hsl(215 16% 47%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
-              <Tooltip contentStyle={{ background: "hsl(0 0% 100%)", border: "1px solid hsl(214 32% 91%)", borderRadius: "12px", boxShadow: "0 2px 16px hsl(0 0% 0% / 0.08)" }} />
+              <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} unit="h" width={30} domain={[0, 24]} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Area type="monotone" dataKey="nhsMax" stackId="nhs" stroke="none" fill="hsl(160 60% 45% / 0.1)" />
-              <Area type="monotone" dataKey="nhsMin" stackId="nhs" stroke="none" fill="hsl(0 0% 100%)" />
+              <Area type="monotone" dataKey="nhsMin" stackId="nhs" stroke="none" fill="hsl(var(--background))" />
               <Area type="monotone" dataKey="total" stroke="hsl(168 40% 54%)" fill="hsl(168 40% 54% / 0.15)" strokeWidth={2} dot={{ fill: "hsl(168 40% 54%)", r: 3 }} />
             </AreaChart>
           </ResponsiveContainer>

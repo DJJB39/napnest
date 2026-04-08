@@ -62,7 +62,7 @@ export const EditStartTime = ({ sleepEntryId, currentStart, onUpdated }: EditSta
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="rounded-3xl max-w-xs mx-auto">
           <DialogHeader>
-            <DialogTitle className="font-display">Edit Start Time</DialogTitle>
+            <DialogTitle className="font-heading font-bold">Edit Start Time</DialogTitle>
             <DialogDescription className="text-muted-foreground text-sm">
               Backdate when sleep actually started
             </DialogDescription>

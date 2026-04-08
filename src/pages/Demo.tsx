@@ -80,7 +80,7 @@ const Demo = () => {
             <SleepingCloud className="absolute top-0 right-0 w-20 h-14 opacity-15" />
             <div className="text-center mb-2">
               <p className="text-muted-foreground text-sm">Tracking</p>
-              <h1 className="text-2xl font-display font-bold">{DEMO_CHILD_NAME} 🌙</h1>
+              <h1 className="text-2xl font-heading font-bold">{DEMO_CHILD_NAME} 🌙</h1>
               <TinyMoonPhases className="justify-center mt-1" />
             </div>
             <WakeWindowTimer lastWakeTime={demoLastWakeTime} dob={DEMO_DOB} />

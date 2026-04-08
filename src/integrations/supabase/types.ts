@@ -98,24 +98,30 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_of_birth: string
+          handover_mode: boolean | null
           id: string
           name: string
+          night_start_hour: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           date_of_birth: string
+          handover_mode?: boolean | null
           id?: string
           name: string
+          night_start_hour?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           date_of_birth?: string
+          handover_mode?: boolean | null
           id?: string
           name?: string
+          night_start_hour?: number | null
           updated_at?: string
         }
         Relationships: []
