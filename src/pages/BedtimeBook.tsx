@@ -49,6 +49,18 @@ const BedtimeBook = () => {
   const [narrating, setNarrating] = useState(false);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
 
+  const resolveIllustrationUrl = useCallback(async (url: string | null): Promise<string | null> => {
+    if (!url) return null;
+    // Handle new storage: prefix format
+    if (url.startsWith("storage:chapter_images/")) {
+      const path = url.replace("storage:chapter_images/", "");
+      const { data } = await supabase.storage.from("chapter_images").createSignedUrl(path, 3600);
+      return data?.signedUrl || null;
+    }
+    // Legacy public URLs still work if bucket is public, otherwise return as-is
+    return url;
+  }, []);
+
   const fetchData = useCallback(async () => {
     if (!user) return;
     const { data: fm } = await supabase
@@ -76,12 +88,16 @@ const BedtimeBook = () => {
 
     if (chaptersRes.data) {
       const map = new Map<number, ChapterData>();
-      chaptersRes.data.forEach((c) => map.set(c.chapter_number, c as ChapterData));
+      for (const c of chaptersRes.data) {
+        const chapter = c as ChapterData;
+        chapter.illustration_url = await resolveIllustrationUrl(chapter.illustration_url);
+        map.set(c.chapter_number, chapter);
+      }
       setCachedChapters(map);
     }
 
     setLoading(false);
-  }, [user]);
+  }, [user, resolveIllustrationUrl]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

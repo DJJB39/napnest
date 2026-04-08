@@ -384,15 +384,51 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Validate JWT - require authenticated user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-
-    const { childId, childName, chapterNumber, ageMonths } = await req.json();
-    if (!childId || chapterNumber === undefined) throw new Error("Missing required fields");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Verify user identity
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { childId, childName, chapterNumber, ageMonths } = await req.json();
+
+    if (!childId || typeof childId !== "string") {
+      return new Response(JSON.stringify({ error: "childId is required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (chapterNumber === undefined || typeof chapterNumber !== "number" || chapterNumber < 0 || chapterNumber > 23) {
+      return new Response(JSON.stringify({ error: "Valid chapterNumber (0-23) is required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Verify user is a family member of this child
+    const { data: isMember } = await supabase.rpc("is_family_member", { _user_id: user.id, _child_id: childId });
+    if (!isMember) {
+      return new Response(JSON.stringify({ error: "Access denied" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Check cache first
     const { data: cached } = await supabase
@@ -403,6 +439,18 @@ serve(async (req) => {
       .maybeSingle();
 
     if (cached) {
+      // Generate signed URL for illustration if it exists
+      if (cached.illustration_url) {
+        const fileName = cached.illustration_url.split("/").pop();
+        if (fileName) {
+          const { data: signedData } = await supabase.storage
+            .from("chapter_images")
+            .createSignedUrl(fileName, 3600);
+          if (signedData?.signedUrl) {
+            cached.illustration_url = signedData.signedUrl;
+          }
+        }
+      }
       return new Response(JSON.stringify(cached), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -419,7 +467,6 @@ serve(async (req) => {
     // Personalise: replace "the Tiny Hero" / "Hero" with child name
     const heroName = childName || "the Tiny Hero";
     let storyText = chapterContent.story;
-    // Only replace standalone "Hero" (not inside other words) and "the Tiny Hero"
     storyText = storyText.replace(/the Tiny Hero/g, heroName);
     storyText = storyText.replace(/\bHero\b/g, heroName);
 
@@ -429,6 +476,7 @@ serve(async (req) => {
 
     // Generate illustration via AI
     let illustrationUrl: string | null = null;
+    let illustrationStoragePath: string | null = null;
     try {
       const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (LOVABLE_API_KEY) {
@@ -469,7 +517,13 @@ serve(async (req) => {
               .upload(fileName, binaryData, { contentType: "image/png", upsert: true });
 
             if (!uploadErr) {
-              illustrationUrl = `${supabaseUrl}/storage/v1/object/public/chapter_images/${fileName}`;
+              // Store the storage path reference, not a public URL
+              illustrationStoragePath = fileName;
+              // Generate a signed URL for the response
+              const { data: signedData } = await supabase.storage
+                .from("chapter_images")
+                .createSignedUrl(fileName, 3600);
+              illustrationUrl = signedData?.signedUrl || null;
             } else {
               console.error("Upload error:", uploadErr);
             }
@@ -480,13 +534,13 @@ serve(async (req) => {
       console.error("Illustration generation failed (non-blocking):", imgErr);
     }
 
-    // Save to cache
+    // Save to cache — store the storage path, not the signed URL
     const chapter = {
       child_id: childId,
       chapter_number: chapterNumber,
       title,
       story_text: storyText,
-      illustration_url: illustrationUrl,
+      illustration_url: illustrationStoragePath ? `storage:chapter_images/${illustrationStoragePath}` : null,
       materia_name: materiaName,
       materia_color: materiaColor,
     };
@@ -499,12 +553,16 @@ serve(async (req) => {
 
     if (saveErr) console.error("Cache save error:", saveErr);
 
-    return new Response(JSON.stringify(saved || chapter), {
+    // Return with the signed URL for immediate display
+    const responseData = saved || chapter;
+    responseData.illustration_url = illustrationUrl;
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("generate-chapter error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An error occurred generating the chapter" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
