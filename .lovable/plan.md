@@ -1,45 +1,47 @@
 
 
-# Add Apple Touch Icons from Uploaded Image
+# Update Demo Mode — Working Sleep Button + 8 Weeks Newborn Data
 
-## Approach
+## Problem
+1. Demo sleep button is disabled (`pointer-events-none`) — users can't interact with it
+2. Demo data only covers 30 days with unrealistic patterns for a newborn (too few wakings, too long sleep stretches)
+3. Demo dashboard layout is out of sync with the real Index page (missing greeting, inline wake window status line, different structure)
 
-Copy the uploaded baby illustration to the project, then use a Python script with Pillow to resize it into four Apple Touch Icon sizes. Update `index.html` with the full set of `<link>` tags.
+## Changes
 
-Note: iOS automatically applies rounded corners to home screen icons — the PNGs should be square (no corner rounding baked in).
+### 1. Rewrite `src/lib/demoData.ts` — 8 weeks of realistic newborn data
 
-## Steps
+- Change DOB to ~6 weeks ago (newborn)
+- Generate 56 days of data with age-appropriate patterns:
+  - Weeks 0-2: 16-17h total sleep, night stretches only 2-3h, 4-6 night wakings, 4-5 short naps
+  - Weeks 3-4: night stretches 3-4h, 3-4 night wakings, 4 naps
+  - Weeks 5-6: night stretches 4-5h, 2-3 night wakings, 3-4 naps
+  - Weeks 7-8: longer stretches emerging, 1-3 night wakings, 3 naps
+- Each night entry gets realistic wakings array (not the current 40% chance of 1-2)
+- Update NHS range to newborn range (14-17h)
+- Expand `demoHistoryEntries` to show more entries (20 instead of 10)
+- Update week data to use 8 weeks (this week + last week stays, but data pool is bigger)
 
-### 1. Copy uploaded image into project
-Copy `user-uploads://IMG_9256.jpeg` to `/tmp/` as a working source.
+### 2. Rewrite `src/pages/Demo.tsx` — working sleep button + match Index layout
 
-### 2. Generate 4 icon sizes via Python/Pillow
-Crop the image to focus on the baby+cloud illustration (remove or minimize the "NapNest" text at the bottom), then resize to:
-- 180×180 → `public/apple-touch-icon.png`
-- 167×167 → `public/apple-touch-icon-167x167.png`
-- 152×152 → `public/apple-touch-icon-152x152.png`
-- 120×120 → `public/apple-touch-icon-120x120.png`
+**Dashboard tab changes:**
+- Add `useState` for `demoActiveSleep` and `demoTodayEntries` (local state, no Supabase)
+- Remove `pointer-events-none` from SleepButton — wire `onToggle` to:
+  - If awake: create a fake sleep entry with `sleep_start = now`, add to local state
+  - If sleeping: set `sleep_end = now` on the active entry, move to today entries
+- Match Index page layout: greeting text, inline wake window status line, nap prediction badge, then SleepButton
+- Remove the separate `WakeWindowTimer` component (Index doesn't use it)
+- Show `NightWakingToggle`-style UI (demo version, local state) when a night sleep is active
+- Show `EditStartTime`-style hint when sleeping (can be non-functional or show a toast saying "Demo mode")
 
-Also regenerate `public/icon-192.png` and `public/icon-512.png` from the same source for manifest consistency.
+**History tab:**
+- Show more entries (20+) to reflect the 8-week dataset
+- Keep existing card design
 
-### 3. Update `index.html`
-Replace the single `apple-touch-icon` line (line 14) with the full set:
-```html
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
-```
-
-## Files
+### Files
 
 | File | Action |
 |------|--------|
-| `public/apple-touch-icon.png` | Create — 180×180 |
-| `public/apple-touch-icon-152x152.png` | Create — 152×152 |
-| `public/apple-touch-icon-167x167.png` | Create — 167×167 |
-| `public/apple-touch-icon-120x120.png` | Create — 120×120 |
-| `public/icon-192.png` | Regenerate — 192×192 from same source |
-| `public/icon-512.png` | Regenerate — 512×512 from same source |
-| `index.html` | Edit — replace line 14 with 4 apple-touch-icon links |
+| `src/lib/demoData.ts` | Rewrite — 56 days, newborn-realistic wakings, updated NHS range |
+| `src/pages/Demo.tsx` | Rewrite — working sleep button with local state, layout matching Index |
 
